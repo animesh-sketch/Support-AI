@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 from datetime import datetime, timedelta
 import numpy as np
 
@@ -13,7 +12,7 @@ st.set_page_config(
 )
 
 # ============================================================================
-# ANAMIKA DESIGN SYSTEM - CLASSY & SMOOTH
+# ANAMIKA DESIGN SYSTEM - FLOATING CHAT WIDGET
 # ============================================================================
 st.markdown("""
 <style>
@@ -23,30 +22,24 @@ st.markdown("""
         --primary: #3b82f6;
         --secondary: #8b5cf6;
         --success: #22c55e;
-        --warning: #f59e0b;
-        --danger: #ef4444;
         --bg: #0f172a;
         --bg-secondary: #1e293b;
         --text: #f1f5f9;
         --text-muted: #94a3b8;
     }
 
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        letter-spacing: -0.3px;
-    }
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         color: var(--text);
     }
 
-    .main { background: transparent; padding: 0; }
+    .main { background: transparent; }
 
     h1 {
         font-size: 48px !important;
         font-weight: 800 !important;
-        letter-spacing: -1px !important;
         background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -62,14 +55,6 @@ st.markdown("""
         padding: 24px;
         backdrop-filter: blur(20px);
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .premium-card:hover {
-        border-color: rgba(59, 130, 246, 0.5);
-        background: rgba(30, 41, 59, 0.9);
-        box-shadow: 0 20px 50px rgba(59, 130, 246, 0.2);
-        transform: translateY(-4px);
     }
 
     .stButton > button {
@@ -79,11 +64,7 @@ st.markdown("""
         padding: 12px 28px !important;
         border-radius: 10px !important;
         font-weight: 700 !important;
-        font-size: 14px !important;
         transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
     .stButton > button:hover {
@@ -91,56 +72,19 @@ st.markdown("""
         box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6) !important;
     }
 
-    .premium-metric {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-        border: 1px solid rgba(59, 130, 246, 0.3);
-        border-radius: 14px;
-        padding: 20px;
-        text-align: center;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
-    }
-
-    .premium-metric:hover {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
-        border-color: rgba(59, 130, 246, 0.5);
-        transform: scale(1.05);
-    }
-
-    .metric-value { color: #3b82f6; font-size: 36px; font-weight: 800; margin: 12px 0; line-height: 1; }
-    .metric-label { color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .metric-change { color: #22c55e; font-size: 12px; font-weight: 700; margin-top: 8px; }
-
-    .premium-divider {
-        border: none;
-        height: 1px;
-        background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.3) 50%, transparent 100%);
-        margin: 32px 0;
-    }
-
     /* ============================================================================
-    ANAMIKA WIDGET - CLASSY & SMOOTH - FIXED RIGHT CORNER
+    FLOATING CHAT WIDGET
     ============================================================================ */
 
-    #anamika-widget-container {
+    .anamika-widget-floating {
         position: fixed !important;
         top: 30px !important;
         right: 30px !important;
         z-index: 999999 !important;
         font-family: 'Inter', sans-serif !important;
-        width: auto !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
     }
 
-    #anamika-widget {
-        position: relative !important;
-        z-index: 999999 !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-
-    .anamika-main-button {
+    .anamika-button-main {
         width: 70px !important;
         height: 70px !important;
         border-radius: 50% !important;
@@ -149,25 +93,17 @@ st.markdown("""
         color: white !important;
         font-size: 32px !important;
         cursor: pointer !important;
-        box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35) !important;
         transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        position: relative !important;
-        padding: 0 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        backdrop-filter: blur(10px) !important;
+        position: relative !important;
     }
 
-    .anamika-main-button:hover {
-        transform: scale(1.18) translateY(-3px) !important;
-        box-shadow: 0 18px 48px rgba(59, 130, 246, 0.45),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-    }
-
-    .anamika-main-button:active {
-        transform: scale(1.12) !important;
+    .anamika-button-main:hover {
+        transform: scale(1.18) !important;
+        box-shadow: 0 18px 48px rgba(59, 130, 246, 0.45) !important;
     }
 
     .anamika-badge {
@@ -184,218 +120,196 @@ st.markdown("""
         justify-content: center !important;
         font-size: 11px !important;
         font-weight: 800 !important;
-        box-shadow: 0 3px 12px rgba(239, 68, 68, 0.6),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-        z-index: 1000000 !important;
+        box-shadow: 0 3px 12px rgba(239, 68, 68, 0.6) !important;
         border: 2px solid rgba(15, 23, 42, 0.8) !important;
-        animation: badge-pulse 2s ease-in-out infinite !important;
     }
 
-    @keyframes badge-pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.12); }
-    }
-
-    /* Menu Container */
-    #anamika-menu-container {
+    .anamika-chatbox {
         position: fixed !important;
-        bottom: 0 !important;
-        right: 0 !important;
-        left: 0 !important;
-        top: 0 !important;
-        z-index: 999998 !important;
-        pointer-events: none !important;
-    }
-
-    .anamika-menu-backdrop {
-        position: absolute !important;
-        bottom: 0 !important;
-        right: 0 !important;
-        left: 0 !important;
-        top: 0 !important;
-        background: rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(4px) !important;
-        pointer-events: auto !important;
-        opacity: 0 !important;
-        transition: opacity 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
-    }
-
-    .anamika-menu-backdrop.open {
-        opacity: 1 !important;
-    }
-
-    .anamika-menu {
-        position: fixed !important;
-        top: 100px !important;
+        top: 110px !important;
         right: 20px !important;
-        background: rgba(15, 23, 42, 0.95) !important;
+        width: 380px !important;
+        height: 600px !important;
+        background: rgba(15, 23, 42, 0.98) !important;
         border: 1px solid rgba(59, 130, 246, 0.3) !important;
         border-radius: 20px !important;
-        padding: 24px !important;
-        min-width: 320px !important;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
         backdrop-filter: blur(30px) !important;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        display: flex !important;
+        flex-direction: column !important;
         z-index: 999998 !important;
-        pointer-events: auto !important;
         opacity: 0 !important;
         transform: translateY(-20px) scale(0.95) !important;
         transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
+        pointer-events: none !important;
     }
 
-    .anamika-menu.open {
+    .anamika-chatbox.open {
         opacity: 1 !important;
         transform: translateY(0) scale(1) !important;
+        pointer-events: auto !important;
     }
 
-    .anamika-menu-header {
-        margin-bottom: 20px !important;
-        text-align: center !important;
-    }
-
-    .anamika-menu-header h3 {
-        color: var(--text) !important;
-        font-size: 18px !important;
-        font-weight: 700 !important;
-        margin: 8px 0 !important;
-        letter-spacing: -0.5px !important;
-    }
-
-    .anamika-menu-header p {
-        color: var(--text-muted) !important;
-        font-size: 13px !important;
-        margin: 6px 0 0 0 !important;
-    }
-
-    .anamika-menu-options {
+    .anamika-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+        padding: 20px !important;
+        border-radius: 20px 20px 0 0 !important;
         display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        margin-bottom: 16px !important;
+        justify-content: space-between !important;
+        align-items: center !important;
     }
 
-    .anamika-option {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%) !important;
-        border: 1px solid rgba(59, 130, 246, 0.2) !important;
-        border-radius: 12px !important;
-        padding: 14px 16px !important;
+    .anamika-header h3 {
+        margin: 0 !important;
+        color: white !important;
+        font-size: 16px !important;
+        font-weight: 700 !important;
+    }
+
+    .anamika-header p {
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-size: 12px !important;
+        margin: 4px 0 0 0 !important;
+    }
+
+    .anamika-close {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: none !important;
+        color: white !important;
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
         cursor: pointer !important;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        color: var(--text) !important;
-        font-size: 14px !important;
-        font-weight: 600 !important;
+        font-size: 18px !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
-    }
-
-    .anamika-option:hover {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%) !important;
-        border-color: rgba(59, 130, 246, 0.4) !important;
-        transform: translateX(6px) !important;
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15) !important;
-    }
-
-    .anamika-option-icon {
-        font-size: 18px !important;
-        min-width: 24px !important;
-    }
-
-    .anamika-option-label {
-        flex: 1 !important;
-    }
-
-    .anamika-option-desc {
-        color: var(--text-muted) !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
-    }
-
-    .anamika-menu-divider {
-        height: 1px !important;
-        background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.2) 50%, transparent 100%) !important;
-        margin: 12px 0 !important;
-    }
-
-    .anamika-menu-footer {
-        display: flex !important;
-        gap: 8px !important;
-    }
-
-    .anamika-close-btn {
-        flex: 1 !important;
-        background: rgba(239, 68, 68, 0.15) !important;
-        border: 1px solid rgba(239, 68, 68, 0.3) !important;
-        color: #ef4444 !important;
-        padding: 10px 14px !important;
-        border-radius: 10px !important;
-        cursor: pointer !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-    }
-
-    .anamika-close-btn:hover {
-        background: rgba(239, 68, 68, 0.25) !important;
-        border-color: rgba(239, 68, 68, 0.5) !important;
-    }
-
-    /* Smooth transitions */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 12px;
-        background: transparent;
-        border-bottom: 2px solid rgba(59, 130, 246, 0.1);
-    }
-
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
-        color: white !important;
-        border: none !important;
-    }
-
-    .stTextInput > div > div > input,
-    .stSelectbox > div > div > select {
-        background: rgba(30, 41, 59, 0.8) !important;
-        color: var(--text) !important;
-        border: 1px solid rgba(59, 130, 246, 0.3) !important;
-        border-radius: 10px !important;
-        padding: 12px 16px !important;
-        font-size: 14px !important;
+        justify-content: center !important;
         transition: all 0.3s ease !important;
     }
 
-    .stTextInput > div > div > input:focus,
-    .stSelectbox > div > div > select:focus {
-        border-color: var(--primary) !important;
+    .anamika-close:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+        transform: scale(1.1) !important;
+    }
+
+    .anamika-messages {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        padding: 20px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    .message-bot {
+        background: rgba(59, 130, 246, 0.2) !important;
+        padding: 12px 14px !important;
+        border-radius: 12px !important;
+        border-left: 3px solid #3b82f6 !important;
+        max-width: 85% !important;
+        align-self: flex-start !important;
+        font-size: 13px !important;
+        color: var(--text) !important;
+    }
+
+    .message-user {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+        padding: 12px 14px !important;
+        border-radius: 12px !important;
+        max-width: 85% !important;
+        align-self: flex-end !important;
+        font-size: 13px !important;
+        color: white !important;
+    }
+
+    .anamika-input-area {
+        padding: 16px !important;
+        border-top: 1px solid rgba(59, 130, 246, 0.2) !important;
+        display: flex !important;
+        gap: 10px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .anamika-input {
+        flex: 1 !important;
+        background: rgba(30, 41, 59, 0.8) !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        border-radius: 10px !important;
+        padding: 10px 12px !important;
+        color: var(--text) !important;
+        font-size: 13px !important;
+        font-family: 'Inter', sans-serif !important;
+        min-height: 0 !important;
+    }
+
+    .anamika-input:focus {
+        border-color: #3b82f6 !important;
+        outline: none !important;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
     }
+
+    .anamika-button-send {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+        border: none !important;
+        color: white !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 10px !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 16px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .anamika-button-send:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .anamika-actions {
+        display: flex !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .anamika-action-btn {
+        flex: 1 !important;
+        background: rgba(59, 130, 246, 0.15) !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        color: #3b82f6 !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    .anamika-action-btn:hover {
+        background: rgba(59, 130, 246, 0.25) !important;
+        border-color: rgba(59, 130, 246, 0.5) !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px !important;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.3) !important;
+        border-radius: 3px !important;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.5) !important;
+    }
 </style>
-
-<!-- ANAMIKA FLOATING WIDGET - CLASSY & SMOOTH -->
-<div id="anamika-widget">
-    <div class="anamika-main-button" id="anamika-button">
-        🎯
-        <div class="anamika-badge" id="anamika-badge">3</div>
-    </div>
-</div>
-
-<script>
-    // Smooth widget interactions
-    document.addEventListener('DOMContentLoaded', function() {
-        const button = document.getElementById('anamika-button');
-        const badge = document.getElementById('anamika-badge');
-
-        if (button) {
-            button.style.cursor = 'pointer';
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            });
-        }
-    });
-</script>
 """, unsafe_allow_html=True)
 
 # ============================================================================
@@ -403,69 +317,62 @@ st.markdown("""
 # ============================================================================
 if 'page' not in st.session_state:
     st.session_state.page = 'dashboard'
+if 'widget_open' not in st.session_state:
+    st.session_state.widget_open = False
+if 'messages' not in st.session_state:
+    st.session_state.messages = [
+        {"role": "bot", "content": "Hi! 👋 I'm Anamika. How can I help you today?"}
+    ]
 if 'admin_password' not in st.session_state:
     st.session_state.admin_password = False
 
 # ============================================================================
-# SAMPLE DATA
+# FLOATING WIDGET - RENDERED IN MAIN LAYOUT
 # ============================================================================
-def generate_sample_data():
-    dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=30, freq='D')
-    return {
-        'dates': dates,
-        'conversations': np.random.randint(50, 150, 30),
-        'chat_volume': np.random.randint(30, 100, 30),
-        'calls': np.random.randint(10, 40, 30),
-    }
+def render_floating_widget():
+    """Render the floating chat widget"""
 
-# ============================================================================
-# CLASSY WIDGET MENU - SIDEBAR STYLE
-# ============================================================================
-def render_anamika_menu():
-    """Render the smooth, classy Anamika menu using columns"""
+    # Determine if widget is open
+    widget_open = st.session_state.widget_open
 
-    # Create a floating menu UI
-    with st.container():
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.session_state.page != 'dashboard':
-                st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
+    # HTML for floating button and chat
+    widget_html = f"""
+    <div class="anamika-widget-floating">
+        <button class="anamika-button-main" id="anamika-open-btn" onclick="document.getElementById('anamika-widget-toggle').click()">
+            🎯
+            <div class="anamika-badge">3</div>
+        </button>
 
-                st.markdown("""
-                <div style="text-align: center; padding: 20px 0;">
-                    <h3 style="margin: 0; color: #3b82f6;">✨ Anamika Menu</h3>
-                    <p style="color: var(--text-muted); font-size: 13px; margin: 8px 0 0 0;">Select an option</p>
+        <div class="anamika-chatbox {'open' if widget_open else ''}">
+            <div class="anamika-header">
+                <div>
+                    <h3>🎯 Anamika</h3>
+                    <p>Always here to help</p>
                 </div>
-                """, unsafe_allow_html=True)
+                <button class="anamika-close" onclick="document.getElementById('anamika-close-btn').click()">✕</button>
+            </div>
 
-                # Menu options with smooth styling
-                menu_cols = st.columns(2, gap="small")
+            <div class="anamika-messages" id="anamika-messages">
+                <!-- Messages will be rendered here -->
+            </div>
 
-                with menu_cols[0]:
-                    if st.button("💬 Chat", use_container_width=True, key="menu_chat"):
-                        st.session_state.page = 'chat'
-                        st.rerun()
+            <div class="anamika-input-area">
+                <div style="width: 100%;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button class="anamika-action-btn" onclick="document.getElementById('call-btn').click()">☎️ Call</button>
+                        <button class="anamika-action-btn" onclick="alert('Chat with agent')">👤 Agent</button>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" class="anamika-input" id="anamika-input" placeholder="Type a message..." />
+                        <button class="anamika-button-send" onclick="document.getElementById('send-btn').click()">📤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """
 
-                with menu_cols[1]:
-                    if st.button("☎️ Voice", use_container_width=True, key="menu_voice"):
-                        st.session_state.page = 'voice'
-                        st.rerun()
-
-                menu_cols2 = st.columns(2, gap="small")
-
-                with menu_cols2[0]:
-                    if st.button("📊 Analytics", use_container_width=True, key="menu_analytics"):
-                        st.session_state.page = 'analytics'
-                        st.rerun()
-
-                with menu_cols2[1]:
-                    if st.button("🔐 Admin", use_container_width=True, key="menu_admin"):
-                        st.session_state.page = 'admin_login'
-                        st.rerun()
-
-                if st.button("🏠 Home", use_container_width=True, key="menu_home"):
-                    st.session_state.page = 'dashboard'
-                    st.rerun()
+    st.markdown(widget_html, unsafe_allow_html=True)
 
 # ============================================================================
 # DASHBOARD PAGE
@@ -475,16 +382,15 @@ def dashboard():
     <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
                  border-radius: 24px; margin-bottom: 40px;">
         <h1>🎯 Anamika</h1>
-        <p style="color: var(--text-muted); font-size: 16px; margin-top: 12px; letter-spacing: -0.3px;">
-            Enterprise Floating Support Widget
+        <p style="color: var(--text-muted); font-size: 16px; margin-top: 12px;">
+            Enterprise Floating Chat Widget
         </p>
-        <p style="color: var(--text-muted); font-size: 13px; margin-top: 16px;">
-            👉 Look for the <strong style="color: #3b82f6;">🎯 button in the bottom-right corner</strong> to get started
+        <p style="color: #22c55e; font-size: 13px; margin-top: 16px; font-weight: 700;">
+            👉 Click the 🎯 button in TOP RIGHT to start chatting!
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Quick nav
     col1, col2, col3, col4 = st.columns(4, gap="small")
     with col1:
         if st.button("💬 Chat", use_container_width=True):
@@ -503,12 +409,9 @@ def dashboard():
             st.session_state.page = 'admin_login'
             st.rerun()
 
-    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
+    st.markdown("---")
 
-    # KPIs
-    st.markdown("#### 📊 Real-time Status")
     col1, col2, col3, col4, col5, col6 = st.columns(6)
-
     metrics = [
         (col1, "💬", "1,245", "Chats", "+12%"),
         (col2, "☎️", "312", "Calls", "+18%"),
@@ -520,34 +423,17 @@ def dashboard():
 
     for col, icon, value, label, trend in metrics:
         with col:
-            st.markdown(f"""
-            <div class="premium-metric">
-                <div style="font-size: 20px;">{icon}</div>
-                <div class="metric-value" style="font-size: 26px;">{value}</div>
-                <div class="metric-label">{label}</div>
-                <div class="metric-change">{trend}</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.metric(label, value, trend)
 
-    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
-
-    # Info
+    st.markdown("---")
     st.markdown("""
     <div class="premium-card">
         <h4>✨ Widget Features</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
-            <div>
-                <p><strong>💬 Smart Chat</strong><br><span style="color: var(--text-muted); font-size: 13px;">AI responses with human escalation</span></p>
-            </div>
-            <div>
-                <p><strong>☎️ Voice Calls</strong><br><span style="color: var(--text-muted); font-size: 13px;">Schedule callbacks with the team</span></p>
-            </div>
-            <div>
-                <p><strong>📚 Knowledge Base</strong><br><span style="color: var(--text-muted); font-size: 13px;">Admin-managed document library</span></p>
-            </div>
-            <div>
-                <p><strong>📊 Analytics</strong><br><span style="color: var(--text-muted); font-size: 13px;">Real-time performance metrics</span></p>
-            </div>
+            <div><p><strong>💬 Smart Chat</strong><br><span style="color: var(--text-muted); font-size: 13px;">Ask questions, get instant AI responses</span></p></div>
+            <div><p><strong>☎️ Call Support</strong><br><span style="color: var(--text-muted); font-size: 13px;">Schedule or start voice calls</span></p></div>
+            <div><p><strong>📚 Knowledge Base</strong><br><span style="color: var(--text-muted); font-size: 13px;">Smart answers from our KB</span></p></div>
+            <div><p><strong>👤 Talk to Agent</strong><br><span style="color: var(--text-muted); font-size: 13px;">Get human support anytime</span></p></div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -557,40 +443,35 @@ def dashboard():
 # ============================================================================
 def chat():
     st.markdown("### 💬 Chat with Anamika")
+
     st.markdown("""
     <div class="premium-card">
         <p style="color: var(--text-muted);">🤖 AI-powered • <strong>45s</strong> response time • <strong>96.8%</strong> accuracy</p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
+    st.markdown("---")
 
-    # Chat simulation
-    st.markdown("""
-    <div class="premium-card" style="height: 350px; overflow-y: auto; margin-bottom: 20px;">
-        <div style="padding: 12px 0;">
-            <div style="background: rgba(59, 130, 246, 0.2); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #3b82f6; margin: 8px 0;">
-                <p style="margin: 0; font-size: 13px;"><strong>You:</strong> How do I reset my password?</p>
-            </div>
-            <div style="background: rgba(34, 197, 94, 0.2); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #22c55e; margin: 8px 0;">
-                <p style="margin: 0; font-size: 13px;"><strong>Anamika:</strong> Click "Forgot Password" on login. We'll email you a reset link within 2 minutes.</p>
-            </div>
-            <div style="background: rgba(59, 130, 246, 0.2); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #3b82f6; margin: 8px 0;">
-                <p style="margin: 0; font-size: 13px;"><strong>You:</strong> What if I don't receive it?</p>
-            </div>
-            <div style="background: rgba(34, 197, 94, 0.2); padding: 12px 14px; border-radius: 10px; border-left: 3px solid #22c55e; margin: 8px 0;">
-                <p style="margin: 0; font-size: 13px;"><strong>Anamika:</strong> Check your spam folder. If still missing, talk to an agent below. ↓</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Display chat messages
+    for msg in st.session_state.messages:
+        if msg["role"] == "bot":
+            st.markdown(f"**Anamika:** {msg['content']}")
+        else:
+            st.markdown(f"**You:** {msg['content']}")
 
+    # Input area
     col1, col2 = st.columns([5, 1])
     with col1:
-        st.text_input("Message...", placeholder="Type your question", label_visibility="collapsed")
+        user_input = st.text_input("Your message...", placeholder="Ask anything", label_visibility="collapsed")
     with col2:
-        st.button("Send", use_container_width=True)
+        send = st.button("Send", use_container_width=True)
 
+    if send and user_input:
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.messages.append({"role": "bot", "content": "Thanks for your message! How else can I help?"})
+        st.rerun()
+
+    st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("☎️ Talk to Agent", use_container_width=True):
@@ -608,20 +489,18 @@ def chat():
 # VOICE PAGE
 # ============================================================================
 def voice():
-    st.markdown("### ☎️ Voice Call with Anamika")
+    st.markdown("### ☎️ Voice Call")
 
     st.markdown("""
     <div class="premium-card">
-        <p style="color: var(--text-muted);">🎧 Crystal-clear voice • Convin Sense powered • Expert support</p>
+        <p style="color: var(--text-muted);">🎧 Crystal-clear voice • Convin Sense powered</p>
     </div>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2, gap="large")
-
     with col1:
         st.text_input("Your Name", placeholder="John Doe", label_visibility="collapsed")
         st.text_input("Email", placeholder="john@example.com", label_visibility="collapsed")
-
     with col2:
         st.text_input("Phone", placeholder="+1-555-123-4567", label_visibility="collapsed")
         st.selectbox("Best Time", ["9 AM - 12 PM", "12 PM - 3 PM", "3 PM - 6 PM", "6 PM - 9 PM"], label_visibility="collapsed")
@@ -630,8 +509,7 @@ def voice():
         st.success("✅ Call scheduled! We'll call you within 2 minutes.")
         st.balloons()
 
-    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
-
+    st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("💬 Chat Instead", use_container_width=True):
@@ -650,73 +528,29 @@ def voice():
 # ANALYTICS PAGE
 # ============================================================================
 def analytics():
-    st.markdown("### 📊 Anamika Analytics")
+    st.markdown("### 📊 Analytics")
 
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 Overview", "💬 Chat", "☎️ Voice", "🎯 Performance"])
-
-    data = generate_sample_data()
+    tab1, tab2 = st.tabs(["Overview", "Performance"])
 
     with tab1:
         col1, col2, col3 = st.columns(3)
         with col1:
             st.metric("Total Conversations", "3,847", "+15%")
         with col2:
-            st.metric("Avg Resolution Time", "12m 30s", "-2m 15s")
+            st.metric("Avg Resolution", "12m 30s", "-2m 15s")
         with col3:
             st.metric("Escalation Rate", "13%", "-2%")
-
-        fig = go.Figure(data=go.Bar(x=data['dates'], y=data['conversations'],
-                                    marker=dict(color='#3b82f6')))
-        fig.update_layout(template='plotly_dark', height=350, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
-                         showlegend=False, xaxis=dict(showgrid=False))
-        st.plotly_chart(fig, use_container_width=True)
 
     with tab2:
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Chat Messages", "1,245", "+12%")
-        with col2:
-            st.metric("Response Time", "1m 45s", "-22s")
-        with col3:
-            st.metric("Chat CSAT", "4.87/5", "+0.15")
-
-        fig = go.Figure(data=go.Scatter(x=data['dates'], y=data['chat_volume'], fill='tozeroy',
-                                        line=dict(color='#3b82f6', width=3)))
-        fig.update_layout(template='plotly_dark', height=350, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
-                         xaxis=dict(showgrid=False), showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-    with tab3:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total Calls", "312", "+18%")
-        with col2:
-            st.metric("Success Rate", "94.2%", "+3.2%")
-        with col3:
-            st.metric("Avg Duration", "8m 30s", "-20s")
-
-        fig = go.Figure(data=go.Scatter(x=data['dates'], y=data['calls'], mode='lines+markers',
-                                        line=dict(color='#8b5cf6', width=3)))
-        fig.update_layout(template='plotly_dark', height=350, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
-                         xaxis=dict(showgrid=False), showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-    with tab4:
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
             st.metric("AI Accuracy", "96.8%", "+1.2%")
         with col2:
-            st.metric("Containment", "87%", "+5%")
+            st.metric("CSAT", "4.87/5", "+0.15")
         with col3:
-            st.metric("First Contact", "78%", "+8%")
-        with col4:
-            st.metric("NPS Score", "72", "+6")
+            st.metric("Response Time", "45s", "-15s")
 
-    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
-
+    st.markdown("---")
     if st.button("Back to Home", use_container_width=True):
         st.session_state.page = 'dashboard'
         st.rerun()
@@ -730,7 +564,7 @@ def admin_login():
         st.markdown("""
         <div class="premium-card" style="text-align: center;">
             <h3>🔐 Anamika Admin</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin: 8px 0 0 0;">Secure access required</p>
+            <p style="color: var(--text-muted); font-size: 13px;">Secure access required</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -773,53 +607,96 @@ def admin_panel():
         st.markdown("#### Voice Configuration")
         st.text_input("Workspace ID", placeholder="workspace_xyz")
         st.text_input("API Key", placeholder="sk-sense-...", type="password")
-        st.toggle("Enable Inbound Calls", value=True)
-        st.toggle("Enable Outbound Calls", value=True)
-        if st.button("Save Voice Config", use_container_width=True):
-            st.success("✅ Saved!")
 
     with tab3:
         st.markdown("#### Agent Management")
         st.text_input("Agent Name", placeholder="John Doe")
-        st.text_input("Email", placeholder="john@company.com")
         st.selectbox("Status", ["Available", "Busy", "Break", "Offline"])
-        if st.button("Add Agent", use_container_width=True):
-            st.success("✅ Agent added!")
 
     with tab4:
         st.markdown("#### Escalation Rules")
         st.selectbox("Trigger", ["Max attempts", "Low confidence", "Customer request"])
-        st.selectbox("Action", ["Escalate to agent", "Transfer to manager", "Create ticket"])
-        if st.button("Create Rule", use_container_width=True):
-            st.success("✅ Rule created!")
 
     with tab5:
         st.markdown("#### Business Hours")
         st.time_input("Start Time", value=None)
         st.time_input("End Time", value=None)
-        st.toggle("24/7 Support", value=False)
-        if st.button("Save Hours", use_container_width=True):
-            st.success("✅ Saved!")
 
     with tab6:
         st.markdown("#### Bot Settings")
         st.toggle("Use Knowledge Base", value=True)
-        st.toggle("Auto-escalation", value=True)
         st.slider("Confidence Threshold", 0, 100, 75)
-        st.slider("Response Timeout (s)", 5, 120, 45)
-        if st.button("Save Bot Settings", use_container_width=True):
-            st.success("✅ Saved!")
 
-    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
-
+    st.markdown("---")
     if st.button("Logout", use_container_width=True):
         st.session_state.admin_password = False
         st.session_state.page = 'dashboard'
         st.rerun()
 
 # ============================================================================
-# MAIN APP
+# MAIN APP LOGIC
 # ============================================================================
+
+# Hidden buttons to control widget state
+col1, col2, col3, col4 = st.columns([1, 1, 1, 10])
+
+with col1:
+    if st.button("🎯"):
+        st.session_state.widget_open = not st.session_state.widget_open
+        st.rerun()
+    st.markdown('<div id="anamika-widget-toggle" style="display: none;"></div>', unsafe_allow_html=True)
+
+with col2:
+    if st.button("✕"):
+        st.session_state.widget_open = False
+        st.rerun()
+    st.markdown('<div id="anamika-close-btn" style="display: none;"></div>', unsafe_allow_html=True)
+
+with col3:
+    if st.button("📤"):
+        if st.session_state.messages[-1]["role"] != "user":
+            user_msg = "User message"
+            st.session_state.messages.append({"role": "user", "content": user_msg})
+            st.session_state.messages.append({"role": "bot", "content": "Thanks! How else can I help?"})
+        st.rerun()
+    st.markdown('<div id="send-btn" style="display: none;"></div>', unsafe_allow_html=True)
+
+with col4:
+    if st.button("📞 Call"):
+        st.session_state.page = 'voice'
+        st.rerun()
+    st.markdown('<div id="call-btn" style="display: none;"></div>', unsafe_allow_html=True)
+
+# Hide the control buttons
+st.markdown("""
+<style>
+    [data-testid="stHorizontalBlock"] > :nth-child(1) { display: none !important; }
+</style>
+""", unsafe_allow_html=True)
+
+# Render floating widget
+render_floating_widget()
+
+# Render chat messages inside widget
+if st.session_state.widget_open:
+    messages_html = ""
+    for msg in st.session_state.messages:
+        if msg["role"] == "bot":
+            messages_html += f'<div class="message-bot">{msg["content"]}</div>'
+        else:
+            messages_html += f'<div class="message-user">{msg["content"]}</div>'
+
+    st.markdown(f"""
+    <script>
+        const messagesDiv = document.getElementById('anamika-messages');
+        if (messagesDiv) {{
+            messagesDiv.innerHTML = `{messages_html}`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }}
+    </script>
+    """, unsafe_allow_html=True)
+
+# Main content based on current page
 if st.session_state.page == 'dashboard':
     dashboard()
 elif st.session_state.page == 'chat':
@@ -833,14 +710,11 @@ elif st.session_state.page == 'admin_login':
 elif st.session_state.page == 'admin_panel':
     admin_panel()
 
-# Sidebar menu
-render_anamika_menu()
-
 # Footer
 st.markdown("""
 <div style="text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid rgba(59, 130, 246, 0.1);">
-    <p style="color: var(--text-muted); font-size: 12px; margin: 0; letter-spacing: -0.3px;">
-        🎯 Anamika Enterprise Widget | Powered by Convin AI | v3.0 Ultra Premium
+    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
+        🎯 Anamika Enterprise Widget | Powered by Convin AI | v4.0 Interactive Chat
     </p>
 </div>
 """, unsafe_allow_html=True)
