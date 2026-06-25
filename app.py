@@ -177,7 +177,7 @@ def search_kb(user_query):
             words = user_query_lower.split()
             content_lower = doc_data.get("content", "").lower()
             for word in words:
-                if len(word) > 2:  # Only match words longer than 2 chars
+                if len(word) > 2:
                     if word in content_lower:
                         match_score += 1
 
@@ -189,7 +189,6 @@ def search_kb(user_query):
                     "score": match_score
                 })
 
-        # Sort by relevance score
         results.sort(key=lambda x: x.get("score", 0), reverse=True)
         return results
     except Exception as e:
@@ -198,35 +197,27 @@ def search_kb(user_query):
 def get_support_response(user_message):
     """Get support agent response from KB or generate intelligent response"""
     try:
-        # Search KB for relevant documents
         kb_results = search_kb(user_message)
 
         if kb_results and len(kb_results) > 0 and kb_results[0].get("score", 0) > 0:
-            # Found relevant KB document
             top_result = kb_results[0]
             response = f"Based on our Knowledge Base:\n\n{top_result['content']}"
             return response, top_result["title"]
         else:
-            # No KB match - provide intelligent response
             user_lower = user_message.lower().strip()
 
-            # Greetings
             if any(word in user_lower for word in ["hello", "hi", "hey", "greetings", "what's up"]):
                 return "👋 Hello! Welcome to Anamika Support. How can I assist you today? I'm here to help with:\n• Password reset & account access\n• Billing & subscription questions\n• API integration & documentation\n• Troubleshooting issues\n\nWhat would you like help with?", "Welcome"
 
-            # Help requests
             elif any(word in user_lower for word in ["help", "support", "assist", "issue", "problem", "error"]):
                 return "I'm here to help! You can ask me about:\n\n✓ Password reset\n✓ Billing & payments\n✓ API documentation\n✓ Troubleshooting\n✓ Account issues\n\nJust type your question and I'll find the answer for you!", "Help Center"
 
-            # Agent escalation
-            elif any(word in user_lower for word in ["agent", "human", "person", "talk to", "speak", "person"]):
+            elif any(word in user_lower for word in ["agent", "human", "person", "talk to", "speak"]):
                 return "👤 Sure! I can connect you with a human support agent right away. They'll be available shortly to help with your specific needs. Would you like me to escalate your question?", "Agent Escalation"
 
-            # Thank you
             elif any(word in user_lower for word in ["thanks", "thank you", "appreciate"]):
                 return "😊 You're welcome! If you have any other questions, feel free to ask. I'm here to help!", "Support"
 
-            # Default response
             else:
                 return f"I understand you're asking about that. Let me search our Knowledge Base for relevant information. If you could be more specific (like mentioning 'password', 'billing', 'API', or 'troubleshooting'), I can provide better answers. Or would you like me to connect you with a human support agent?", "Support"
 
@@ -292,7 +283,6 @@ st.markdown("""
         box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6) !important;
     }
 
-    /* WIDGET STYLES */
     .widget-button-float {
         position: fixed !important;
         top: 30px !important;
@@ -430,6 +420,7 @@ st.markdown("""
         font-family: 'Inter', sans-serif !important;
         box-sizing: border-box !important;
         transition: all 0.3s ease !important;
+        margin-bottom: 10px !important;
     }
 
     .widget-input:focus {
@@ -441,7 +432,6 @@ st.markdown("""
     .widget-buttons {
         display: flex !important;
         gap: 8px !important;
-        margin-top: 10px !important;
     }
 
     .widget-btn {
@@ -497,10 +487,10 @@ if 'widget_chat' not in st.session_state:
     ]
 if 'widget_input' not in st.session_state:
     st.session_state.widget_input = ""
+if 'widget_visible' not in st.session_state:
+    st.session_state.widget_visible = False
 if 'kb_files' not in st.session_state:
-    # Load from persistent storage
     st.session_state.kb_files = get_kb_files()
-    # If no files exist, create default ones
     if len(st.session_state.kb_files) == 0:
         add_kb_file("Password Reset Guide.pdf", "2.3 MB", "PDF", "Active")
         add_kb_file("Billing FAQ.docx", "1.8 MB", "DOCX", "Active")
@@ -510,28 +500,47 @@ if 'kb_files' not in st.session_state:
 # FLOATING WIDGET COMPONENT
 # ============================================================================
 def render_widget():
-    """Render the floating chat widget"""
+    """Render the floating chat widget with full chat functionality"""
 
-    # Widget HTML structure
-    widget_html = """
-    <div class="widget-button-float" id="widget-btn">
+    # Hidden input area at bottom for chat
+    col_hidden1, col_hidden2, col_hidden3 = st.columns([10, 1, 1])
+
+    with col_hidden1:
+        widget_msg = st.text_input("Chat", key="widget_msg_input", label_visibility="collapsed", placeholder="Ask Anamika...", on_change=None)
+
+    with col_hidden2:
+        if st.button("🎯", key="widget_toggle", help="Toggle Widget", label_visibility="collapsed"):
+            st.session_state.widget_visible = not st.session_state.widget_visible
+            st.rerun()
+
+    with col_hidden3:
+        if st.button("📤", key="widget_send_btn", help="Send", label_visibility="collapsed"):
+            if widget_msg and widget_msg.strip():
+                st.session_state.widget_chat.append({"role": "user", "text": widget_msg})
+                bot_response, source = get_support_response(widget_msg)
+                st.session_state.widget_chat.append({"role": "bot", "text": bot_response, "source": source})
+                st.rerun()
+
+    # Widget HTML
+    widget_html = f"""
+    <div class="widget-button-float" id="widget-btn" onclick="document.getElementById('widget-toggle').click()">
         🎯
         <div class="widget-badge">3</div>
     </div>
-    <div class="widget-chat" id="widget-chat" style="display: none;">
+    <div class="widget-chat" id="widget-chat" style="display: {'flex' if st.session_state.widget_visible else 'none'};">
         <div class="widget-header">
             <div>
                 <h3>🎯 Anamika</h3>
-                <p style="margin: 4px 0 0 0; color: rgba(255,255,255,0.8); font-size: 12px;">Always here to help</p>
+                <p style="margin: 4px 0 0 0; color: rgba(255,255,255,0.8); font-size: 12px;">AI Support</p>
             </div>
-            <button style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px;" id="close-btn">✕</button>
+            <button onclick="document.getElementById('widget-toggle').click()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
         </div>
         <div class="widget-messages" id="messages"></div>
         <div class="widget-input-area">
-            <input type="text" class="widget-input" id="msg-input" placeholder="Type message..." />
+            <input type="text" class="widget-input" id="msg-input" placeholder="Ask me anything..." />
             <div class="widget-buttons">
-                <button class="widget-btn" id="call-btn">☎️ Call</button>
-                <button class="widget-btn" id="agent-btn">👤 Agent</button>
+                <button class="widget-btn" onclick="document.getElementById('widget-send-btn').click()" style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important; color: white !important; flex: 2;">📤</button>
+                <button class="widget-btn" onclick="document.getElementById('widget-toggle').click()">✕</button>
             </div>
         </div>
     </div>
@@ -539,44 +548,36 @@ def render_widget():
 
     st.markdown(widget_html, unsafe_allow_html=True)
 
-    # JavaScript to handle widget interactions
-    st.markdown("""
+    # Update widget messages
+    messages_html = ""
+    for msg in st.session_state.widget_chat:
+        if msg["role"] == "bot":
+            source = msg.get("source", "Support")
+            text = msg["text"].replace('\n', '<br>').replace('"', '\\"')
+            messages_html += f'<div class="msg-bot"><strong style="color: #22c55e;">🤖</strong><br><span style="margin-top: 4px; display: block;">{text}</span><div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(59, 130, 246, 0.2); font-size: 10px; color: #94a3b8;">📚 {source}</div></div>'
+        else:
+            text = msg["text"].replace('\n', '<br>').replace('"', '\\"')
+            messages_html += f'<div class="msg-user">{text}</div>'
+
+    st.markdown(f"""
     <script>
-        setTimeout(() => {
-            const btn = document.getElementById('widget-btn');
-            const chat = document.getElementById('widget-chat');
-            const closeBtn = document.getElementById('close-btn');
+        setTimeout(() => {{
+            const messagesDiv = document.getElementById('messages');
+            if (messagesDiv) {{
+                messagesDiv.innerHTML = `{messages_html}`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }}
+
             const msgInput = document.getElementById('msg-input');
-            const callBtn = document.getElementById('call-btn');
-            const agentBtn = document.getElementById('agent-btn');
-
-            if (btn && chat) {
-                // Toggle widget
-                btn.addEventListener('click', () => {
-                    chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
-                    if (chat.style.display === 'flex' && msgInput) {
-                        setTimeout(() => msgInput.focus(), 100);
-                    }
-                });
-
-                // Close widget
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', () => {
-                        chat.style.display = 'none';
-                    });
-                }
-            }
-
-            // Smooth scroll to bottom
-            function scrollToBottom() {
-                const messages = document.getElementById('messages');
-                if (messages) {
-                    messages.scrollTop = messages.scrollHeight;
-                }
-            }
-
-            setTimeout(scrollToBottom, 100);
-        }, 300);
+            if (msgInput) {{
+                msgInput.addEventListener('keypress', (e) => {{
+                    if (e.key === 'Enter' && msgInput.value.trim()) {{
+                        document.getElementById('widget-send-btn').click();
+                        msgInput.value = '';
+                    }}
+                }});
+            }}
+        }}, 100);
     </script>
     """, unsafe_allow_html=True)
 
@@ -588,7 +589,7 @@ def dashboard():
     <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); border-radius: 24px; margin-bottom: 40px;">
         <h1>🎯 Anamika</h1>
         <p style="color: var(--text-muted); font-size: 16px; margin-top: 12px;">Enterprise Floating Chat Widget</p>
-        <p style="color: #22c55e; font-size: 13px; margin-top: 16px; font-weight: 700;">👉 Click the 🎯 button in TOP RIGHT to chat!</p>
+        <p style="color: #22c55e; font-size: 13px; margin-top: 16px; font-weight: 700;">👉 Chat directly in the 🎯 widget in TOP RIGHT!</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -634,22 +635,12 @@ def chat_page():
 
     st.markdown("""
     <div class="premium-card">
-        <p style="margin: 0;">🤖 <strong>Anamika Support Agent</strong> • Powered by Knowledge Base • Response Time: <strong>Instant</strong></p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 12px; border-radius: 10px; margin-bottom: 16px;">
-        <p style="margin: 0; font-size: 12px; color: #22c55e;"><strong>💡 Try asking:</strong></p>
-        <p style="margin: 6px 0 0 0; font-size: 12px; color: var(--text-muted);">
-            "How do I reset my password?" • "What's your billing?" • "API documentation" • "Troubleshooting"
-        </p>
+        <p style="margin: 0;">🤖 <strong>Anamika Support Agent</strong> • Powered by Knowledge Base</p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # Display chat
     for msg in st.session_state.widget_chat:
         if msg["role"] == "bot":
             source = msg.get("source", "Support")
@@ -670,41 +661,17 @@ def chat_page():
 
     st.markdown("---")
 
-    # Input
     col1, col2 = st.columns([5, 1])
     with col1:
-        user_msg = st.text_input("Ask a question...", label_visibility="collapsed", placeholder="Type your question about passwords, billing, API, troubleshooting, etc.")
+        user_msg = st.text_input("Ask a question...", label_visibility="collapsed", placeholder="Type your question")
     with col2:
         send = st.button("Send", use_container_width=True)
 
     if send and user_msg:
-        # Add user message
         st.session_state.widget_chat.append({"role": "user", "text": user_msg})
-
-        # Get support response from KB
         bot_response, source = get_support_response(user_msg)
-
-        # Add bot response
-        st.session_state.widget_chat.append({
-            "role": "bot",
-            "text": bot_response,
-            "source": source
-        })
+        st.session_state.widget_chat.append({"role": "bot", "text": bot_response, "source": source})
         st.rerun()
-
-    st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("☎️ Call Agent", use_container_width=True):
-            st.info("📞 Connecting to agent...")
-    with col2:
-        if st.button("📊 Analytics", use_container_width=True):
-            st.session_state.page = 'analytics'
-            st.rerun()
-    with col3:
-        if st.button("Home", use_container_width=True):
-            st.session_state.page = 'dashboard'
-            st.rerun()
 
 # ============================================================================
 # VOICE PAGE
@@ -720,24 +687,14 @@ def voice_page():
         st.text_input("Phone", label_visibility="collapsed", placeholder="+1-555-123-4567")
         st.selectbox("Best Time", ["9 AM - 12 PM", "12 PM - 3 PM", "3 PM - 6 PM", "6 PM - 9 PM"], label_visibility="collapsed")
 
-    if st.button("📞 Schedule Call", use_container_width=True):
-        st.success("✅ Call scheduled! We'll call you within 2 minutes.")
+    if st.button("📞 Schedule Voice Call", use_container_width=True):
+        st.success("✅ Call scheduled!")
         st.balloons()
 
     st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("💬 Chat Instead", use_container_width=True):
-            st.session_state.page = 'chat'
-            st.rerun()
-    with col2:
-        if st.button("📊 Analytics", use_container_width=True):
-            st.session_state.page = 'analytics'
-            st.rerun()
-    with col3:
-        if st.button("Home", use_container_width=True):
-            st.session_state.page = 'dashboard'
-            st.rerun()
+    if st.button("Home", use_container_width=True):
+        st.session_state.page = 'dashboard'
+        st.rerun()
 
 # ============================================================================
 # ANALYTICS PAGE
@@ -754,7 +711,7 @@ def analytics_page():
         st.metric("Escalation Rate", "13%", "-2%")
 
     st.markdown("---")
-    if st.button("Back to Home", use_container_width=True):
+    if st.button("Home", use_container_width=True):
         st.session_state.page = 'dashboard'
         st.rerun()
 
@@ -767,48 +724,21 @@ def admin_page():
     tab1, tab2, tab3, tab4 = st.tabs(["📚 Knowledge Base", "🎤 Voice Config", "🤖 Bot Settings", "⚡ Advanced"])
 
     with tab1:
-        st.markdown("#### 📚 Knowledge Base Management")
-        st.markdown("""
-        <div class="premium-card">
-            <p style="margin: 0; color: #22c55e; font-weight: 700;">✓ 💾 PERMANENT STORAGE ENABLED</p>
-            <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
-                All files are saved permanently and won't be deleted. Your KB is always available.
-            </p>
-            <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
-                <strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, CSV, XLS, XLSX, PPT, PPTX, JSON, XML
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("#### Knowledge Base Management")
 
-        st.markdown("##### Upload Documents (Up to 5 files)")
-
-        # File uploader for multiple formats
         col1, col2 = st.columns(2)
         with col1:
             uploaded_files = st.file_uploader(
-                "Choose files",
+                "Upload files",
                 type=['pdf', 'doc', 'docx', 'txt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'json', 'xml'],
                 accept_multiple_files=True,
                 label_visibility="collapsed"
             )
 
             if uploaded_files:
-                st.markdown("**Uploading Files:**")
                 for file in uploaded_files:
-                    file_size = f"{file.size / 1024 / 1024:.1f}" if file.size < 10_000_000 else f"{file.size / 1024 / 1024 / 1024:.2f}"
-                    file_unit = "MB" if file.size < 10_000_000 else "GB"
-
-                    st.markdown(f"""
-                    <div class="premium-card" style="padding: 12px; margin: 8px 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="margin: 0; font-weight: 700;">📄 {file.name}</p>
-                                <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 12px;">{file_size} {file_unit}</p>
-                            </div>
-                            <span style="color: #22c55e; font-weight: 700;">✓</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    file_size = f"{file.size / 1024 / 1024:.1f} MB"
+                    st.markdown(f"📄 {file.name} ({file_size})")
 
                 if st.button("✅ Upload All Files", use_container_width=True, key="upload_kb"):
                     uploaded_count = 0
@@ -818,126 +748,51 @@ def admin_page():
                         if add_kb_file(file.name, file_size, file_type, "Active"):
                             uploaded_count += 1
                     st.session_state.kb_files = get_kb_files()
-                    st.success(f"✅ {uploaded_count} file(s) uploaded and saved permanently!")
+                    st.success(f"✅ {uploaded_count} file(s) uploaded!")
                     st.rerun()
 
         with col2:
-            st.markdown("**Storage Status**")
-            st.markdown(f"""
-            <div class="premium-card">
-                <div style="text-align: center;">
-                    <p style="margin: 0; font-size: 24px; font-weight: 900; color: #22c55e;">✓ {len(st.session_state.kb_files)}</p>
-                    <p style="margin: 6px 0 0 0; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Files Permanently Stored</p>
-                </div>
-                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.2);">
-                    <p style="margin: 0; font-size: 12px; color: #22c55e;"><strong>💾 Persistent Storage:</strong> Active</p>
-                    <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Max Files:</strong> 5</p>
-                    <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Available Slots:</strong> {5 - len(st.session_state.kb_files)}</p>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.metric("Files Stored", len(st.session_state.kb_files), "/ 5")
 
-        st.markdown("---")
-        st.markdown("##### 📋 Knowledge Base Files")
-
-        if len(st.session_state.kb_files) == 0:
-            st.info("📚 No files uploaded yet. Upload files above to get started!")
-        else:
-            # Display KB files in a table
+        if len(st.session_state.kb_files) > 0:
             kb_data = {
-                "📄 File Name": [f["name"] for f in st.session_state.kb_files],
-                "📊 Type": [f["type"] for f in st.session_state.kb_files],
-                "💾 Size": [f["size"] for f in st.session_state.kb_files],
-                "📅 Date": [f["date"] for f in st.session_state.kb_files],
-                "✓ Status": [f["status"] for f in st.session_state.kb_files],
+                "Name": [f["name"] for f in st.session_state.kb_files],
+                "Type": [f["type"] for f in st.session_state.kb_files],
+                "Size": [f["size"] for f in st.session_state.kb_files],
             }
-            df = pd.DataFrame(kb_data)
-            st.dataframe(df, use_container_width=True, hide_index=True)
-
-            st.markdown("**File Actions:**")
-            col_action1, col_action2, col_action3 = st.columns(3)
-
-            with col_action1:
-                if st.button("🔍 View Files", use_container_width=True):
-                    st.info("📂 Viewing all files in Knowledge Base...")
-
-            with col_action2:
-                file_to_delete = st.selectbox(
-                    "Delete file",
-                    options=[f["name"] for f in st.session_state.kb_files],
-                    label_visibility="collapsed"
-                )
-                if st.button("🗑️ Delete Selected", use_container_width=True):
-                    delete_kb_file(file_to_delete)
-                    st.session_state.kb_files = get_kb_files()
-                    st.success(f"✅ {file_to_delete} deleted!")
-                    st.rerun()
-
-            with col_action3:
-                if st.button("📊 Analytics", use_container_width=True):
-                    st.info("📈 KB usage analytics coming soon...")
+            st.dataframe(pd.DataFrame(kb_data), use_container_width=True)
 
     with tab2:
-        st.markdown("#### 🎤 Voice Configuration (Convin Sense)")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.text_input("Workspace ID", placeholder="workspace_xyz", label_visibility="collapsed")
-            st.text_input("API Key", placeholder="sk-sense-...", type="password", label_visibility="collapsed")
-        with col2:
-            st.toggle("Enable Inbound Calls", value=True)
-            st.toggle("Enable Outbound Calls", value=True)
-
-        st.selectbox("Default Voice", ["Male (Professional)", "Female (Friendly)", "AI (Natural)"], label_visibility="collapsed")
-        st.slider("Speech Rate", 0.5, 2.0, 1.0)
-
-        if st.button("💾 Save Voice Config", use_container_width=True):
-            st.success("✅ Voice configuration saved!")
+        st.markdown("#### Voice Configuration")
+        st.text_input("Workspace ID", placeholder="workspace_xyz", label_visibility="collapsed")
+        st.text_input("API Key", placeholder="sk-sense-...", type="password", label_visibility="collapsed")
+        if st.button("💾 Save", use_container_width=True):
+            st.success("✅ Saved!")
 
     with tab3:
-        st.markdown("#### 🤖 Bot Settings")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.toggle("Use Knowledge Base", value=True)
-            st.toggle("Auto-escalation", value=True)
-        with col2:
-            st.toggle("Log Conversations", value=True)
-            st.toggle("Enable Feedback", value=True)
-
-        st.slider("Confidence Threshold (%)", 0, 100, 75)
-        st.slider("Response Timeout (seconds)", 5, 120, 45)
-
-        if st.button("💾 Save Bot Settings", use_container_width=True):
-            st.success("✅ Bot settings saved!")
+        st.markdown("#### Bot Settings")
+        st.toggle("Use Knowledge Base", value=True)
+        st.slider("Confidence Threshold", 0, 100, 75)
+        if st.button("💾 Save", use_container_width=True):
+            st.success("✅ Saved!")
 
     with tab4:
-        st.markdown("#### ⚡ Advanced Settings")
-        st.markdown("""
-        <div class="premium-card">
-            <p><strong>🔐 Security</strong></p>
-            <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Enable two-factor authentication and security logs</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("#### Advanced Settings")
+        st.toggle("Enable 2FA", value=False)
+        if st.button("💾 Save", use_container_width=True):
+            st.success("✅ Saved!")
 
-        st.toggle("🔐 Enable 2FA", value=False)
-        st.toggle("📝 Enable Audit Logs", value=True)
-        st.toggle("🔒 Enable IP Whitelist", value=False)
-
-        if st.button("💾 Save Advanced Settings", use_container_width=True):
-            st.success("✅ Advanced settings saved!")
-
-        st.markdown("---")
-        if st.button("Back to Home", use_container_width=True):
-            st.session_state.page = 'dashboard'
-            st.rerun()
+    st.markdown("---")
+    if st.button("Home", use_container_width=True):
+        st.session_state.page = 'dashboard'
+        st.rerun()
 
 # ============================================================================
 # MAIN APP
 # ============================================================================
 
-# Render floating widget
 render_widget()
 
-# Render content based on page
 if st.session_state.page == 'dashboard':
     dashboard()
 elif st.session_state.page == 'chat':
@@ -949,61 +804,8 @@ elif st.session_state.page == 'analytics':
 elif st.session_state.page == 'admin':
     admin_page()
 
-# Update widget messages with JavaScript
-messages_html = ""
-for msg in st.session_state.widget_chat:
-    if msg["role"] == "bot":
-        source = msg.get("source", "Support")
-        # Escape special characters and preserve newlines
-        text = msg["text"].replace('\n', '<br>').replace('"', '\\"')
-        messages_html += f'<div class="msg-bot"><strong style="color: #22c55e;">🤖 Anamika</strong><br><span style="margin-top: 4px; display: block;">{text}</span><div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(59, 130, 246, 0.2); font-size: 10px; color: #94a3b8;">📚 {source}</div></div>'
-    else:
-        text = msg["text"].replace('\n', '<br>').replace('"', '\\"')
-        messages_html += f'<div class="msg-user">{text}</div>'
-
-st.markdown(f"""
-<script>
-    setTimeout(() => {{
-        const messagesDiv = document.getElementById('messages');
-        if (messagesDiv) {{
-            messagesDiv.innerHTML = `{messages_html}`;
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }}
-
-        const input = document.getElementById('msg-input');
-        const callBtn = document.getElementById('call-btn');
-        const agentBtn = document.getElementById('agent-btn');
-
-        if (input && input.value === '') {{
-            input.addEventListener('keypress', (e) => {{
-                if (e.key === 'Enter' && input.value.trim()) {{
-                    // Send message via Streamlit
-                    const event = new Event('change', {{ bubbles: true }});
-                    input.dispatchEvent(event);
-                }}
-            }});
-        }}
-
-        if (callBtn) {{
-            callBtn.addEventListener('click', () => {{
-                alert('📞 Connecting to voice support...');
-            }});
-        }}
-
-        if (agentBtn) {{
-            agentBtn.addEventListener('click', () => {{
-                alert('👤 Connecting to agent...');
-            }});
-        }}
-    }}, 300);
-</script>
-""", unsafe_allow_html=True)
-
-# Footer
 st.markdown("""
 <div style="text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid rgba(59, 130, 246, 0.1);">
-    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
-        🎯 Anamika | Enterprise Widget | v4.1 Smooth & Functional
-    </p>
+    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">🎯 Anamika | v5.0 - Widget Chat Ready</p>
 </div>
 """, unsafe_allow_html=True)
