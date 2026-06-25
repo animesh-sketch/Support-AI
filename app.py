@@ -409,103 +409,238 @@ if st.session_state.page == 'home':
         st.metric("Response", "45s", "-15s")
 
 elif st.session_state.page == 'analytics':
-    st.markdown("# 📊 Analytics Dashboard")
+    st.markdown("""
+    <style>
+        .kpi-card {
+            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 8px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+            text-align: center;
+        }
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin: 12px 0;
+        }
+        .kpi-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .kpi-change {
+            font-size: 13px;
+            margin-top: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 600;
+        }
+        .kpi-positive { background: #dcfce7; color: #166534; }
+        .kpi-negative { background: #fee2e2; color: #991b1b; }
+        .section-header {
+            color: #3b82f6;
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 32px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #3b82f6;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        .stat-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            color: #3b82f6;
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    # KPI Metrics Row
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 32px;">
+        <h1 style="color: #3b82f6; font-size: 42px; margin: 0;">📊 Analytics Dashboard</h1>
+        <p style="color: #64748b; font-size: 16px; margin-top: 8px;">Real-time insights for Voice Bot & AI Support</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # KPI Metrics Row - Styled
     st.markdown("## 🎯 Key Performance Indicators")
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    with col1:
-        st.metric("Total Conversations", "5,847", "+18%", delta_color="off")
-    with col2:
-        st.metric("Resolution Rate", "94.2%", "+3.2%", delta_color="off")
-    with col3:
-        st.metric("Avg Response Time", "2.3s", "-0.5s", delta_color="inverse")
-    with col4:
-        st.metric("CSAT Score", "4.87/5", "+0.15", delta_color="off")
-    with col5:
-        st.metric("AI Deflection", "87%", "+5%", delta_color="off")
-    with col6:
-        st.metric("Escalation Rate", "13%", "-2%", delta_color="inverse")
+    kpi1, kpi2, kpi3, kpi4, kpi5, kpi6 = st.columns(6)
 
-    st.markdown("---")
+    with kpi1:
+        st.markdown("""
+        <div class="kpi-card">
+            <div class="kpi-label">📞 Conversations</div>
+            <div class="kpi-value">5,847</div>
+            <div class="kpi-change kpi-positive">↑ +18%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi2:
+        st.markdown("""
+        <div class="kpi-card">
+            <div class="kpi-label">✅ Resolution</div>
+            <div class="kpi-value">94.2%</div>
+            <div class="kpi-change kpi-positive">↑ +3.2%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi3:
+        st.markdown("""
+        <div class="kpi-card">
+            <div class="kpi-label">⚡ Response Time</div>
+            <div class="kpi-value">2.3s</div>
+            <div class="kpi-change kpi-positive">↓ -0.5s</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi4:
+        st.markdown("""
+        <div class="kpi-card">
+            <div class="kpi-label">😊 CSAT Score</div>
+            <div class="kpi-value">4.87/5</div>
+            <div class="kpi-change kpi-positive">↑ +0.15</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi5:
+        st.markdown("""
+        <div class="kpi-card">
+            <div class="kpi-label">🤖 AI Deflection</div>
+            <div class="kpi-value">87%</div>
+            <div class="kpi-change kpi-positive">↑ +5%</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with kpi6:
+        st.markdown("""
+        <div class="kpi-card">
+            <div class="kpi-label">🔄 Escalation</div>
+            <div class="kpi-value">13%</div>
+            <div class="kpi-change kpi-positive">↓ -2%</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # AI Chat Analytics
-    st.markdown("## 💬 AI Chat Support Analytics")
+    st.markdown('<div class="section-header">💬 AI Chat Support Analytics</div>', unsafe_allow_html=True)
     chat_col1, chat_col2, chat_col3 = st.columns([2, 1, 1])
 
     with chat_col1:
-        st.markdown("### Chat Metrics")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0;">Chat Metrics</h3>
+        """, unsafe_allow_html=True)
+
         chat_metrics = {
-            "Total Messages": "12,543",
-            "Avg Messages/Conversation": "3.2",
-            "Avg Chat Duration": "4m 30s",
-            "Peak Hour": "2:00 PM",
-            "KB Answer Success Rate": "92%",
-            "Human Handoff Rate": "8%"
+            "💌 Total Messages": "12,543",
+            "📊 Avg Messages/Chat": "3.2",
+            "⏱️ Avg Chat Duration": "4m 30s",
+            "🕐 Peak Hour": "2:00 PM",
+            "📚 KB Success Rate": "92%",
+            "🔄 Human Handoff": "8%"
         }
         for metric, value in chat_metrics.items():
-            st.write(f"**{metric}:** {value}")
+            st.markdown(f'<div class="stat-card"><div class="stat-label">{metric}</div><div class="stat-value">{value}</div></div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with chat_col2:
-        st.markdown("### Message Types")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Message Types</h3>
+        """, unsafe_allow_html=True)
         message_data = pd.DataFrame({
             "Type": ["Greeting", "Questions", "Support", "Feedback"],
             "Count": [1250, 4320, 5230, 1743]
         })
         st.bar_chart(message_data.set_index("Type")["Count"], color="#3b82f6")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with chat_col3:
-        st.markdown("### Top Topics")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Top Topics</h3>
+        """, unsafe_allow_html=True)
         topics = pd.DataFrame({
             "Topic": ["Pricing", "Getting Started", "API", "Billing"],
             "Count": [1200, 980, 750, 620]
         })
         st.bar_chart(topics.set_index("Topic")["Count"], color="#3b82f6")
-
-    st.markdown("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Voice Bot Analytics
-    st.markdown("## ☎️ Voice Bot Call Analytics")
+    st.markdown('<div class="section-header">☎️ Voice Bot Call Analytics</div>', unsafe_allow_html=True)
     call_col1, call_col2, call_col3 = st.columns([2, 1, 1])
 
     with call_col1:
-        st.markdown("### Voice Metrics")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0;">Voice Metrics</h3>
+        """, unsafe_allow_html=True)
+
         voice_metrics = {
-            "Total Calls": "2,847",
-            "Completed Calls": "2,634 (92.5%)",
-            "Avg Call Duration": "8m 45s",
-            "Avg Wait Time": "35s",
-            "Voice Quality Score": "4.6/5",
-            "Call Success Rate": "94.3%"
+            "☎️ Total Calls": "2,847",
+            "✅ Completed Calls": "2,634 (92.5%)",
+            "⏱️ Avg Call Duration": "8m 45s",
+            "⏳ Avg Wait Time": "35s",
+            "🎵 Voice Quality": "4.6/5",
+            "✨ Success Rate": "94.3%"
         }
         for metric, value in voice_metrics.items():
-            st.write(f"**{metric}:** {value}")
+            st.markdown(f'<div class="stat-card"><div class="stat-label">{metric}</div><div class="stat-value">{value}</div></div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with call_col2:
-        st.markdown("### Call Status")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Call Status</h3>
+        """, unsafe_allow_html=True)
         call_status = pd.DataFrame({
             "Status": ["Completed", "Missed", "Dropped"],
             "Count": [2634, 156, 57]
         })
         st.bar_chart(call_status.set_index("Status")["Count"], color="#3b82f6")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with call_col3:
-        st.markdown("### Call Times")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Call Times</h3>
+        """, unsafe_allow_html=True)
         call_times = pd.DataFrame({
             "Time Slot": ["9-12 AM", "12-3 PM", "3-6 PM", "6-9 PM"],
             "Calls": [580, 720, 890, 657]
         })
         st.bar_chart(call_times.set_index("Time Slot")["Calls"], color="#3b82f6")
-
-    st.markdown("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Trend Analysis
-    st.markdown("## 📈 Trend Analysis (Last 30 Days)")
+    st.markdown('<div class="section-header">📈 Trend Analysis (Last 30 Days)</div>', unsafe_allow_html=True)
 
     trend_col1, trend_col2 = st.columns(2)
 
     with trend_col1:
-        st.markdown("### Conversation Trends")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0;">📊 Conversation Trends</h3>
+        """, unsafe_allow_html=True)
         import numpy as np
         days = pd.date_range(start='2026-05-26', periods=30)
         conversations = np.random.randint(150, 250, 30).cumsum() + 2000
@@ -514,107 +649,135 @@ elif st.session_state.page == 'analytics':
             "Conversations": conversations
         })
         st.line_chart(trend_data.set_index("Date"), color="#3b82f6")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with trend_col2:
-        st.markdown("### Response Quality Trend")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0;">✨ Response Quality Trend</h3>
+        """, unsafe_allow_html=True)
         quality = np.random.uniform(85, 98, 30)
         quality_data = pd.DataFrame({
             "Date": days,
             "Quality %": quality
         })
         st.line_chart(quality_data.set_index("Date"), color="#3b82f6")
-
-    st.markdown("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Sentiment & Feedback
-    st.markdown("## 😊 Sentiment & Feedback Analysis")
+    st.markdown('<div class="section-header">😊 Sentiment & Feedback Analysis</div>', unsafe_allow_html=True)
 
     sentiment_col1, sentiment_col2, sentiment_col3 = st.columns(3)
 
     with sentiment_col1:
-        st.markdown("### Overall Sentiment")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Overall Sentiment</h3>
+        """, unsafe_allow_html=True)
         sentiment = pd.DataFrame({
             "Sentiment": ["Positive", "Neutral", "Negative"],
             "Percentage": [72, 21, 7]
         })
         st.bar_chart(sentiment.set_index("Sentiment")["Percentage"], color="#3b82f6")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with sentiment_col2:
-        st.markdown("### NPS Score Distribution")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">NPS Distribution</h3>
+        """, unsafe_allow_html=True)
         nps = pd.DataFrame({
             "Score": ["9-10\n(Promoters)", "7-8\n(Passives)", "0-6\n(Detractors)"],
             "Count": [2104, 876, 304]
         })
         st.bar_chart(nps.set_index("Score")["Count"], color="#3b82f6")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with sentiment_col3:
-        st.markdown("### Issue Resolution")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Resolution Status</h3>
+        """, unsafe_allow_html=True)
         resolution = pd.DataFrame({
             "Type": ["Resolved\non 1st\nContact", "Escalated\nto Agent", "Pending\nFU"],
             "Count": [5501, 298, 48]
         })
         st.bar_chart(resolution.set_index("Type")["Count"], color="#3b82f6")
-
-    st.markdown("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Agent Performance
-    st.markdown("## 👥 Agent Performance")
+    st.markdown('<div class="section-header">👥 Agent Performance</div>', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+    """, unsafe_allow_html=True)
 
     agent_data = pd.DataFrame({
-        "Agent": ["Agent A", "Agent B", "Agent C", "Agent D"],
-        "Calls Handled": [287, 256, 234, 198],
-        "Avg Rating": [4.8, 4.6, 4.7, 4.5],
-        "Resolution Rate": [96, 93, 94, 91]
+        "👤 Agent": ["Agent A", "Agent B", "Agent C", "Agent D"],
+        "📞 Calls Handled": [287, 256, 234, 198],
+        "⭐ Avg Rating": [4.8, 4.6, 4.7, 4.5],
+        "✅ Resolution %": [96, 93, 94, 91]
     })
-    st.dataframe(agent_data, use_container_width=True)
-
-    st.markdown("---")
+    st.dataframe(agent_data, use_container_width=True, hide_index=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Top Issues & Solutions
-    st.markdown("## 🔧 Top Issues & Quick Solutions")
+    st.markdown('<div class="section-header">🔧 Top Issues & Quick Solutions</div>', unsafe_allow_html=True)
 
     issues_col1, issues_col2 = st.columns(2)
 
     with issues_col1:
-        st.markdown("### Most Common Issues")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0;">Most Common Issues</h3>
+        """, unsafe_allow_html=True)
         issues = pd.DataFrame({
-            "Issue": ["Password Reset", "Billing Question", "Account Access", "Feature Info", "Bug Report"],
-            "Frequency": [1243, 987, 756, 654, 432]
+            "🔴 Issue": ["Password Reset", "Billing Question", "Account Access", "Feature Info", "Bug Report"],
+            "📊 Frequency": [1243, 987, 756, 654, 432]
         })
-        st.table(issues)
+        st.dataframe(issues, use_container_width=True, hide_index=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with issues_col2:
-        st.markdown("### Solutions Success Rate")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0;">Solution Success Rate</h3>
+        """, unsafe_allow_html=True)
         solutions = pd.DataFrame({
-            "Solution": ["Password Reset", "Billing Question", "Account Access", "Feature Info", "Bug Report"],
-            "Success %": [98, 94, 91, 87, 76]
+            "✅ Solution": ["Password Reset", "Billing Question", "Account Access", "Feature Info", "Bug Report"],
+            "📈 Success %": [98, 94, 91, 87, 76]
         })
-        st.table(solutions)
-
-    st.markdown("---")
+        st.dataframe(solutions, use_container_width=True, hide_index=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Comparison: Chat vs Voice
-    st.markdown("## ⚖️ Channel Comparison: Chat vs Voice")
+    st.markdown('<div class="section-header">⚖️ Channel Comparison: Chat vs Voice</div>', unsafe_allow_html=True)
 
     comp_col1, comp_col2 = st.columns(2)
 
     with comp_col1:
-        st.markdown("### Volume Comparison")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Volume Comparison</h3>
+        """, unsafe_allow_html=True)
         channel = pd.DataFrame({
-            "Channel": ["AI Chat", "Voice Bot"],
-            "Total Interactions": [12543, 2847]
+            "Channel": ["💬 AI Chat", "☎️ Voice Bot"],
+            "Interactions": [12543, 2847]
         })
-        st.bar_chart(channel.set_index("Channel")["Total Interactions"], color="#3b82f6")
+        st.bar_chart(channel.set_index("Channel")["Interactions"], color="#3b82f6")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with comp_col2:
-        st.markdown("### Satisfaction Comparison")
+        st.markdown("""
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; border: 2px solid #e2e8f0;">
+            <h3 style="color: #3b82f6; margin-top: 0; font-size: 18px;">Satisfaction Comparison</h3>
+        """, unsafe_allow_html=True)
         satisfaction = pd.DataFrame({
-            "Channel": ["AI Chat", "Voice Bot"],
+            "Channel": ["💬 AI Chat", "☎️ Voice Bot"],
             "CSAT Score": [4.87, 4.65]
         })
         st.bar_chart(satisfaction.set_index("Channel")["CSAT Score"], color="#3b82f6")
-
-    st.markdown("---")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     if st.button("← Home"):
         st.session_state.page = 'home'
