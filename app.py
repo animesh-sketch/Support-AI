@@ -328,21 +328,23 @@ def render_chat_widget():
         if st.button("Send", key="send-chat"):
             pass
 
-    # Call widget display
+    # Call widget display - using Streamlit form for better handling
     if st.session_state.call_open:
-        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:380px;background:rgba(15,23,42,0.98);border:1px solid rgba(34,197,94,0.3);border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.6);backdrop-filter:blur(30px);display:flex;flex-direction:column;overflow:hidden;"><div style="background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">☎️ Schedule Call</h3><p style="margin:4px 0 0 0;font-size:12px;">Quick callback</p></div><div style="padding:20px;"><p style="color:#94a3b8;font-size:13px;margin-bottom:12px;">Get a call from our support team</p></div></div>', unsafe_allow_html=True)
+        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:380px;background:rgba(15,23,42,0.98);border:1px solid rgba(34,197,94,0.3);border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.6);backdrop-filter:blur(30px);overflow:hidden;"><div style="background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">☎️ Schedule a Call</h3><p style="margin:4px 0 0 0;font-size:12px;">We\'ll call within 2 minutes</p></div></div>', unsafe_allow_html=True)
 
-        col1, col2 = st.columns([3, 1])
+        col1, col2 = st.columns([4, 1])
         with col1:
-            phone = st.text_input("Phone Number", placeholder="+1 (555) 000-0000", label_visibility="collapsed")
+            call_phone = st.text_input("Phone", placeholder="+1 (555) 123-4567", key="call_phone_input", label_visibility="collapsed")
         with col2:
-            if st.button("📞 Call Me", use_container_width=True):
-                if phone and phone.strip():
-                    st.success(f"✅ Call scheduled! We'll call {phone} within 2 minutes")
+            if st.button("📞", key="submit_call", help="Schedule Call"):
+                if call_phone and call_phone.strip():
+                    st.success(f"✅ Call scheduled to {call_phone}! You'll receive a call within 2 minutes.")
                     st.session_state.call_open = False
                     st.rerun()
+                else:
+                    st.error("Please enter a phone number")
 
-        if st.button("Close Call", key="close_call"):
+        if st.button("Close ✕", key="close_call", use_container_width=True):
             st.session_state.call_open = False
             st.rerun()
 
