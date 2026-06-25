@@ -506,15 +506,15 @@ def render_widget():
     col_hidden1, col_hidden2, col_hidden3 = st.columns([10, 1, 1])
 
     with col_hidden1:
-        widget_msg = st.text_input("Chat", key="widget_msg_input", label_visibility="collapsed", placeholder="Ask Anamika...", on_change=None)
+        widget_msg = st.text_input("Message", key="widget_msg_input", label_visibility="collapsed", placeholder="Ask Anamika...")
 
     with col_hidden2:
-        if st.button("🎯", key="widget_toggle", help="Toggle Widget", label_visibility="collapsed"):
+        if st.button("Toggle", key="widget_toggle", help="Toggle Widget"):
             st.session_state.widget_visible = not st.session_state.widget_visible
             st.rerun()
 
     with col_hidden3:
-        if st.button("📤", key="widget_send_btn", help="Send", label_visibility="collapsed"):
+        if st.button("Send", key="widget_send_btn", help="Send Message"):
             if widget_msg and widget_msg.strip():
                 st.session_state.widget_chat.append({"role": "user", "text": widget_msg})
                 bot_response, source = get_support_response(widget_msg)
