@@ -289,61 +289,20 @@ def render_chat_widget():
 
     # Chat widget display
     if st.session_state.chat_open:
-        # Create columns to position widget
-        st.markdown("""
-        <div style="position: fixed; right: 20px; bottom: 20px; z-index: 9999; width: 420px; max-height: 600px; background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 20px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6); backdrop-filter: blur(30px); display: flex; flex-direction: column; overflow: hidden;">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <div>
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 700;">🎯 Anamika</h3>
-                    <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.9;">AI Support Assistant</p>
-                </div>
-                <button onclick="document.getElementById('chat-toggle').click()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px;">✕</button>
-            </div>
+        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:420px;max-height:600px;background:rgba(15,23,42,0.98);border:1px solid rgba(59,130,246,0.3);border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.6);backdrop-filter:blur(30px);display:flex;flex-direction:column;overflow:hidden;"><div style="background:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%);padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">🎯 Anamika</h3><p style="margin:4px 0 0 0;font-size:12px;">AI Support</p></div><div id="chat-messages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;height:350px;"></div><div style="padding:16px;border-top:1px solid rgba(59,130,246,0.2);display:flex;gap:10px;"><input type="text" id="chat-input" placeholder="Ask..." style="flex:1;padding:10px;background:rgba(30,41,59,0.8);border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:#f1f5f9;font-size:13px;"/><button onclick="sendChatMsg()" style="padding:10px 16px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600;">📤</button></div></div>', unsafe_allow_html=True)
 
-            <!-- Messages -->
-            <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px;"></div>
-
-            <!-- Input -->
-            <div style="padding: 16px; border-top: 1px solid rgba(59, 130, 246, 0.2); display: flex; gap: 10px;">
-                <input type="text" id="chat-input" placeholder="Ask me anything..." style="flex: 1; padding: 12px 16px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 10px; color: #f1f5f9; font-size: 14px;"/>
-                <button onclick="sendChatMessage()" style="padding: 12px 20px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); border: none; border-radius: 10px; color: white; cursor: pointer; font-weight: 600;">📤</button>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Render messages
         msgs_html = ""
         for msg in st.session_state.messages:
             if msg["role"] == "bot":
-                msgs_html += f'''<div style="padding: 12px 16px; border-radius: 12px; font-size: 14px; background: rgba(59, 130, 246, 0.2); border-left: 3px solid #3b82f6; color: #f1f5f9; align-self: flex-start; max-width: 85%;">
-                    <strong>🤖</strong><br>{msg["text"]}<br><span style="font-size: 11px; color: #94a3b8; margin-top: 6px; display: block;">📚 {msg.get("source", "Support")}</span>
-                </div>'''
+                txt = msg["text"].replace('"', '&quot;').replace('\n', '<br>')
+                src = msg.get("source", "Support")
+                msgs_html += f'<div style="padding:10px;border-radius:10px;background:rgba(59,130,246,0.2);border-left:3px solid #3b82f6;color:#f1f5f9;max-width:85%;"><strong>🤖</strong><br>{txt}<br><span style="font-size:11px;color:#94a3b8;margin-top:4px;">📚 {src}</span></div>'
             else:
-                msgs_html += f'''<div style="padding: 12px 16px; border-radius: 12px; font-size: 14px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; align-self: flex-end; max-width: 85%;">
-                    {msg["text"]}
-                </div>'''
+                txt = msg["text"].replace('"', '&quot;')
+                msgs_html += f'<div style="padding:10px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;max-width:85%;align-self:flex-end;">{txt}</div>'
 
-        st.markdown(f"""
-        <script>
-        document.getElementById('chat-messages').innerHTML = `{msgs_html}`;
-        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+        st.markdown(f'<script>let m=document.getElementById("chat-messages");m.innerHTML="{msgs_html}";m.scrollTop=m.scrollHeight;function sendChatMsg(){{let i=document.getElementById("chat-input");if(i.value.trim()){{document.getElementById("send-chat").click();i.value=""}}}}; document.getElementById("chat-input").addEventListener("keypress",e=>{{if(e.key==="Enter")sendChatMsg()}});</script>', unsafe_allow_html=True)
 
-        function sendChatMessage() {{
-            let input = document.getElementById('chat-input');
-            if (input.value.trim()) {{
-                document.getElementById('send-chat').click();
-                input.value = '';
-            }}
-        }}
-
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {{
-            if (e.key === 'Enter') sendChatMessage();
-        }});
-        </script>
-        """, unsafe_allow_html=True)
-
-        # Hidden send button
         if st.button("Send", key="send-chat"):
             pass
 
