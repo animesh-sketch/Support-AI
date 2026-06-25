@@ -338,8 +338,10 @@ def render_chat_widget():
         .floating-header-text h3 { margin: 0; font-size: 18px; font-weight: 700; }
         .floating-header-text p { margin: 4px 0 0 0; font-size: 12px; opacity: 0.9; }
         .status-badge { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 6px; }
-        .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: all 0.3s; }
-        .close-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+
+        .header-buttons { display: flex; gap: 8px; }
+        .header-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .header-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
 
         .messages-scroll {
             flex: 1;
@@ -464,7 +466,7 @@ def render_chat_widget():
                     src = msg.get("source", "Support")
                     messages_html += f'<div class="message-item bot-msg"><div class="msg-bubble bot-bubble"><strong>🤖</strong><br>{text}<span class="source-text">📚 {src}</span></div></div>'
 
-        # Render floating widget
+        # Render floating widget with controls
         st.markdown(f"""
         <div class="floating-widget">
             <div class="floating-header">
@@ -472,13 +474,38 @@ def render_chat_widget():
                     <h3>🎯 Anamika</h3>
                     <p><span class="status-badge"></span>Always here to help</p>
                 </div>
+                <div class="header-buttons">
+                    <button class="header-btn" id="clear-btn" title="Clear chat">🔄</button>
+                    <button class="header-btn" id="close-btn" title="Close">✕</button>
+                </div>
             </div>
             <div class="messages-scroll">{messages_html}</div>
         </div>
+
+        <script>
+            document.getElementById('clear-btn').onclick = function() {{
+                const buttons = document.querySelectorAll('button');
+                for (let btn of buttons) {{
+                    if (btn.getAttribute('data-testid') && btn.getAttribute('data-testid').includes('clear_chat_btn')) {{
+                        btn.click();
+                        break;
+                    }}
+                }}
+            }};
+            document.getElementById('close-btn').onclick = function() {{
+                const buttons = document.querySelectorAll('button');
+                for (let btn of buttons) {{
+                    if (btn.getAttribute('data-testid') && btn.getAttribute('data-testid').includes('chat_toggle')) {{
+                        btn.click();
+                        break;
+                    }}
+                }}
+            }};
+        </script>
         """, unsafe_allow_html=True)
 
         # Chat input (below floating widget, but styled to match)
-        col1, col2 = st.columns([5, 1])
+        col1, col2, col3 = st.columns([4, 1, 1])
         with col1:
             user_input = st.text_input("Message", key="float_input", placeholder="💭 Ask your question...", label_visibility="collapsed")
         with col2:
@@ -488,6 +515,10 @@ def render_chat_widget():
                     bot_response, source = get_ai_response(user_input)
                     st.session_state.messages.append({"role": "bot", "text": bot_response, "source": source})
                     st.rerun()
+        with col3:
+            if st.button("🔄", key="clear_chat_btn", help="Clear chat"):
+                st.session_state.messages = []
+                st.rerun()
 
         # JavaScript to scroll messages
         st.markdown("""
