@@ -299,83 +299,51 @@ if 'kb_files' not in st.session_state:
 # CHAT WIDGET COMPONENT
 # ============================================================================
 def render_chat_widget():
-    """Render world-class professional chat widget - Fixed & Working"""
+    """Render chat widget - Simple & Working"""
 
     # Chat & Call toggle buttons
     col1, col2, col3 = st.columns([19, 1, 1])
     with col2:
-        if st.button("💬", key="chat_toggle", help="Open Chat"):
+        if st.button("💬", key="chat_toggle"):
             st.session_state.chat_open = not st.session_state.chat_open
             st.rerun()
     with col3:
-        if st.button("☎️", key="call_toggle", help="Schedule Call"):
+        if st.button("☎️", key="call_toggle"):
             st.session_state.call_open = True
             st.session_state.chat_open = False
             st.rerun()
 
-    # Chat panel - shown when chat is open
+    # Chat panel
     if st.session_state.chat_open:
         st.markdown("---")
-        st.markdown("### 🎯 Anamika Chat")
+        st.markdown("## 🎯 Chat with Anamika")
 
-        # Display all messages
-        messages_container = st.container()
-        with messages_container:
-            for msg in st.session_state.messages:
-                if msg["role"] == "user":
-                    st.markdown(f"""
-                    <div style="display: flex; justify-content: flex-end; margin: 10px 0;">
-                        <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 12px 16px; border-radius: 14px; max-width: 70%; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);">
-                            👤 {msg['text']}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    src = msg.get("source", "Support")
-                    st.markdown(f"""
-                    <div style="display: flex; justify-content: flex-start; margin: 10px 0;">
-                        <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%); border-left: 4px solid #3b82f6; color: #1e293b; padding: 12px 16px; border-radius: 14px; max-width: 70%; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);">
-                            <strong>🤖 Anamika</strong><br>{msg['text']}<br><span style="font-size: 11px; color: #64748b; margin-top: 8px; display: block;">📚 Source: {src}</span>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+        # Display messages
+        for msg in st.session_state.messages:
+            if msg["role"] == "user":
+                st.markdown(f"**👤 You:** {msg['text']}")
+            else:
+                src = msg.get("source", "Support")
+                st.markdown(f"**🤖 Anamika:** {msg['text']}\n\n📚 *Source: {src}*")
 
-        # Typing indicator
-        if st.session_state.bot_typing:
-            st.markdown("""
-            <div style="display: flex; gap: 6px; margin: 10px 0;">
-                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite;"></div>
-                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite 0.2s;"></div>
-                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite 0.4s;"></div>
-            </div>
-            <style>
-                @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-            </style>
-            """, unsafe_allow_html=True)
-
-        # Chat input
-        st.markdown("---")
+        # Chat input and send
         col1, col2 = st.columns([5, 1])
         with col1:
-            chat_input = st.text_input("💬 Your message", placeholder="Ask Anamika...", key="chat_msg_input", label_visibility="collapsed")
+            user_input = st.text_input("Ask your question:", key="user_input_chat", placeholder="Type here...")
         with col2:
-            send_btn = st.button("Send 📤", key="send_chat_btn", use_container_width=True)
+            if st.button("Send", key="send_btn_chat"):
+                if user_input and user_input.strip():
+                    # Add user message
+                    st.session_state.messages.append({"role": "user", "text": user_input})
 
-        # Process message
-        if send_btn and chat_input and chat_input.strip():
-            st.session_state.messages.append({"role": "user", "text": chat_input})
-            st.session_state.bot_typing = True
-            st.rerun()
+                    # Get bot response
+                    bot_response, source = get_ai_response(user_input)
 
-        # Generate bot response
-        if st.session_state.bot_typing and len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "user":
-            import time
-            time.sleep(0.5)  # Brief delay for better UX
-            last_msg = st.session_state.messages[-1]["text"]
-            response, source = get_ai_response(last_msg)
-            st.session_state.messages.append({"role": "bot", "text": response, "source": source})
-            st.session_state.bot_typing = False
-            st.rerun()
+                    # Add bot message
+                    st.session_state.messages.append({"role": "bot", "text": bot_response, "source": source})
+
+                    # Rerun to clear input and show messages
+                    st.rerun()
 
     # Call widget display - using Streamlit form for better handling
     if st.session_state.call_open:
