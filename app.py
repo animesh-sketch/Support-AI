@@ -409,15 +409,214 @@ if st.session_state.page == 'home':
         st.metric("Response", "45s", "-15s")
 
 elif st.session_state.page == 'analytics':
-    st.markdown("### 📊 Analytics Dashboard")
-    col1, col2, col3 = st.columns(3)
+    st.markdown("# 📊 Analytics Dashboard")
+
+    # KPI Metrics Row
+    st.markdown("## 🎯 Key Performance Indicators")
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
     with col1:
-        st.metric("Conversations", "3,847", "+15%")
+        st.metric("Total Conversations", "5,847", "+18%", delta_color="off")
     with col2:
-        st.metric("Avg Resolution", "12m 30s", "-2m")
+        st.metric("Resolution Rate", "94.2%", "+3.2%", delta_color="off")
     with col3:
-        st.metric("Escalation Rate", "13%", "-2%")
-    if st.button("Home"):
+        st.metric("Avg Response Time", "2.3s", "-0.5s", delta_color="inverse")
+    with col4:
+        st.metric("CSAT Score", "4.87/5", "+0.15", delta_color="off")
+    with col5:
+        st.metric("AI Deflection", "87%", "+5%", delta_color="off")
+    with col6:
+        st.metric("Escalation Rate", "13%", "-2%", delta_color="inverse")
+
+    st.markdown("---")
+
+    # AI Chat Analytics
+    st.markdown("## 💬 AI Chat Support Analytics")
+    chat_col1, chat_col2, chat_col3 = st.columns([2, 1, 1])
+
+    with chat_col1:
+        st.markdown("### Chat Metrics")
+        chat_metrics = {
+            "Total Messages": "12,543",
+            "Avg Messages/Conversation": "3.2",
+            "Avg Chat Duration": "4m 30s",
+            "Peak Hour": "2:00 PM",
+            "KB Answer Success Rate": "92%",
+            "Human Handoff Rate": "8%"
+        }
+        for metric, value in chat_metrics.items():
+            st.write(f"**{metric}:** {value}")
+
+    with chat_col2:
+        st.markdown("### Message Types")
+        message_data = pd.DataFrame({
+            "Type": ["Greeting", "Questions", "Support", "Feedback"],
+            "Count": [1250, 4320, 5230, 1743]
+        })
+        st.bar_chart(message_data.set_index("Type")["Count"], color="#3b82f6")
+
+    with chat_col3:
+        st.markdown("### Top Topics")
+        topics = pd.DataFrame({
+            "Topic": ["Pricing", "Getting Started", "API", "Billing"],
+            "Count": [1200, 980, 750, 620]
+        })
+        st.bar_chart(topics.set_index("Topic")["Count"], color="#3b82f6")
+
+    st.markdown("---")
+
+    # Voice Bot Analytics
+    st.markdown("## ☎️ Voice Bot Call Analytics")
+    call_col1, call_col2, call_col3 = st.columns([2, 1, 1])
+
+    with call_col1:
+        st.markdown("### Voice Metrics")
+        voice_metrics = {
+            "Total Calls": "2,847",
+            "Completed Calls": "2,634 (92.5%)",
+            "Avg Call Duration": "8m 45s",
+            "Avg Wait Time": "35s",
+            "Voice Quality Score": "4.6/5",
+            "Call Success Rate": "94.3%"
+        }
+        for metric, value in voice_metrics.items():
+            st.write(f"**{metric}:** {value}")
+
+    with call_col2:
+        st.markdown("### Call Status")
+        call_status = pd.DataFrame({
+            "Status": ["Completed", "Missed", "Dropped"],
+            "Count": [2634, 156, 57]
+        })
+        st.bar_chart(call_status.set_index("Status")["Count"], color="#3b82f6")
+
+    with call_col3:
+        st.markdown("### Call Times")
+        call_times = pd.DataFrame({
+            "Time Slot": ["9-12 AM", "12-3 PM", "3-6 PM", "6-9 PM"],
+            "Calls": [580, 720, 890, 657]
+        })
+        st.bar_chart(call_times.set_index("Time Slot")["Calls"], color="#3b82f6")
+
+    st.markdown("---")
+
+    # Trend Analysis
+    st.markdown("## 📈 Trend Analysis (Last 30 Days)")
+
+    trend_col1, trend_col2 = st.columns(2)
+
+    with trend_col1:
+        st.markdown("### Conversation Trends")
+        import numpy as np
+        days = pd.date_range(start='2026-05-26', periods=30)
+        conversations = np.random.randint(150, 250, 30).cumsum() + 2000
+        trend_data = pd.DataFrame({
+            "Date": days,
+            "Conversations": conversations
+        })
+        st.line_chart(trend_data.set_index("Date"), color="#3b82f6")
+
+    with trend_col2:
+        st.markdown("### Response Quality Trend")
+        quality = np.random.uniform(85, 98, 30)
+        quality_data = pd.DataFrame({
+            "Date": days,
+            "Quality %": quality
+        })
+        st.line_chart(quality_data.set_index("Date"), color="#3b82f6")
+
+    st.markdown("---")
+
+    # Sentiment & Feedback
+    st.markdown("## 😊 Sentiment & Feedback Analysis")
+
+    sentiment_col1, sentiment_col2, sentiment_col3 = st.columns(3)
+
+    with sentiment_col1:
+        st.markdown("### Overall Sentiment")
+        sentiment = pd.DataFrame({
+            "Sentiment": ["Positive", "Neutral", "Negative"],
+            "Percentage": [72, 21, 7]
+        })
+        st.bar_chart(sentiment.set_index("Sentiment")["Percentage"], color="#3b82f6")
+
+    with sentiment_col2:
+        st.markdown("### NPS Score Distribution")
+        nps = pd.DataFrame({
+            "Score": ["9-10\n(Promoters)", "7-8\n(Passives)", "0-6\n(Detractors)"],
+            "Count": [2104, 876, 304]
+        })
+        st.bar_chart(nps.set_index("Score")["Count"], color="#3b82f6")
+
+    with sentiment_col3:
+        st.markdown("### Issue Resolution")
+        resolution = pd.DataFrame({
+            "Type": ["Resolved\non 1st\nContact", "Escalated\nto Agent", "Pending\nFU"],
+            "Count": [5501, 298, 48]
+        })
+        st.bar_chart(resolution.set_index("Type")["Count"], color="#3b82f6")
+
+    st.markdown("---")
+
+    # Agent Performance
+    st.markdown("## 👥 Agent Performance")
+
+    agent_data = pd.DataFrame({
+        "Agent": ["Agent A", "Agent B", "Agent C", "Agent D"],
+        "Calls Handled": [287, 256, 234, 198],
+        "Avg Rating": [4.8, 4.6, 4.7, 4.5],
+        "Resolution Rate": [96, 93, 94, 91]
+    })
+    st.dataframe(agent_data, use_container_width=True)
+
+    st.markdown("---")
+
+    # Top Issues & Solutions
+    st.markdown("## 🔧 Top Issues & Quick Solutions")
+
+    issues_col1, issues_col2 = st.columns(2)
+
+    with issues_col1:
+        st.markdown("### Most Common Issues")
+        issues = pd.DataFrame({
+            "Issue": ["Password Reset", "Billing Question", "Account Access", "Feature Info", "Bug Report"],
+            "Frequency": [1243, 987, 756, 654, 432]
+        })
+        st.table(issues)
+
+    with issues_col2:
+        st.markdown("### Solutions Success Rate")
+        solutions = pd.DataFrame({
+            "Solution": ["Password Reset", "Billing Question", "Account Access", "Feature Info", "Bug Report"],
+            "Success %": [98, 94, 91, 87, 76]
+        })
+        st.table(solutions)
+
+    st.markdown("---")
+
+    # Comparison: Chat vs Voice
+    st.markdown("## ⚖️ Channel Comparison: Chat vs Voice")
+
+    comp_col1, comp_col2 = st.columns(2)
+
+    with comp_col1:
+        st.markdown("### Volume Comparison")
+        channel = pd.DataFrame({
+            "Channel": ["AI Chat", "Voice Bot"],
+            "Total Interactions": [12543, 2847]
+        })
+        st.bar_chart(channel.set_index("Channel")["Total Interactions"], color="#3b82f6")
+
+    with comp_col2:
+        st.markdown("### Satisfaction Comparison")
+        satisfaction = pd.DataFrame({
+            "Channel": ["AI Chat", "Voice Bot"],
+            "CSAT Score": [4.87, 4.65]
+        })
+        st.bar_chart(satisfaction.set_index("Channel")["CSAT Score"], color="#3b82f6")
+
+    st.markdown("---")
+
+    if st.button("← Home"):
         st.session_state.page = 'home'
         st.rerun()
 
