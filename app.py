@@ -416,9 +416,10 @@ def render_dashboard():
         counts = [156, 48, 32]
 
         fig = go.Figure(data=go.Pie(labels=channels, values=counts,
-                                     marker=dict(colors=['#3b82f6', '#2563eb', '#1e40af'])))
+                                     marker=dict(colors=['#3b82f6', '#2563eb', '#1e40af']),
+                                     textinfo='label+percent'))
         fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)', textinfo='label+percent')
+                         paper_bgcolor='rgba(30,41,59,0.5)')
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
