@@ -299,243 +299,204 @@ if 'kb_files' not in st.session_state:
 # CHAT WIDGET COMPONENT
 # ============================================================================
 def render_chat_widget():
-    """Render premium chat widget with professional design"""
+    """Render floating premium chat widget"""
 
-    # Premium CSS styling
+    # Premium CSS styling for floating widget
     st.markdown("""
     <style>
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
-        .premium-chat-container {
+        .floating-widget {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 450px;
+            max-height: 700px;
             background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
             border: 2px solid #3b82f6;
             border-radius: 20px;
-            padding: 24px;
-            margin: 20px 0;
-            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
-            animation: slideUp 0.5s ease-out;
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 9999;
+            animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .chat-header-premium {
+        .floating-header {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+            padding: 18px 20px;
+            border-radius: 18px 18px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
         }
 
-        .chat-header-text h3 { margin: 0; font-size: 20px; font-weight: 700; }
-        .chat-header-text p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }
-        .status-dot { display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; margin-right: 8px; }
+        .floating-header-text h3 { margin: 0; font-size: 18px; font-weight: 700; }
+        .floating-header-text p { margin: 4px 0 0 0; font-size: 12px; opacity: 0.9; }
+        .status-badge { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 6px; }
+        .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; transition: all 0.3s; }
+        .close-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
 
-        .messages-area {
-            max-height: 400px;
+        .messages-scroll {
+            flex: 1;
             overflow-y: auto;
-            padding: 16px 0;
-            margin-bottom: 20px;
-        }
-
-        .message-bubble {
-            animation: fadeIn 0.4s ease-in;
-            margin-bottom: 16px;
+            padding: 16px;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 12px;
+            background: white;
         }
 
-        .bot-message {
-            justify-content: flex-start;
-        }
+        .message-item { animation: fadeIn 0.4s ease-in; display: flex; }
+        .user-msg { justify-content: flex-end; }
+        .bot-msg { justify-content: flex-start; }
 
-        .user-message {
-            justify-content: flex-end;
-        }
-
-        .message-content {
-            padding: 14px 16px;
-            border-radius: 16px;
-            max-width: 75%;
+        .msg-bubble {
+            padding: 12px 16px;
+            border-radius: 14px;
+            max-width: 80%;
             word-wrap: break-word;
-            line-height: 1.5;
             font-size: 14px;
+            line-height: 1.4;
         }
 
-        .bot-content {
+        .bot-bubble {
             background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%);
             color: #1e293b;
             border-left: 4px solid #3b82f6;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
         }
 
-        .user-content {
+        .user-bubble {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
         }
 
-        .message-source {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(59, 130, 246, 0.2);
-            font-weight: 600;
-        }
+        .source-text { font-size: 11px; color: #64748b; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(59, 130, 246, 0.2); display: block; }
 
-        .input-area-premium {
+        .empty-state {
             display: flex;
-            gap: 12px;
-            padding: 16px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
-            border-radius: 14px;
-            border: 2px solid #e2e8f0;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+            text-align: center;
+            padding: 20px;
         }
 
-        .input-area-premium:focus-within {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
+        .empty-state p { margin: 8px 0; font-size: 13px; }
 
-        .input-field-premium {
-            flex: 1;
-            padding: 12px 16px;
+        .floating-footer {
+            padding: 12px;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
             background: white;
+            border-radius: 0 0 18px 18px;
+        }
+
+        .float-input {
+            flex: 1;
+            padding: 10px 14px;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            background: white;
+            font-size: 13px;
+            transition: all 0.3s;
+            font-family: inherit;
         }
 
-        .input-field-premium:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
+        .float-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
-        .send-btn-premium {
-            padding: 12px 24px;
+        .float-btn {
+            padding: 10px 16px;
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             border: none;
             border-radius: 10px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
         }
 
-        .send-btn-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
-        }
-
-        .send-btn-premium:active {
-            transform: translateY(0);
-        }
-
-        .chat-footer-info {
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
-        }
+        .float-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
     </style>
-
-    <div class="premium-chat-container">
-        <div class="chat-header-premium">
-            <div class="chat-header-text">
-                <h3>🎯 Anamika</h3>
-                <p><span class="status-dot"></span>Always here to help</p>
-            </div>
-            <div style="font-size: 28px;">💬</div>
-        </div>
     """, unsafe_allow_html=True)
 
-    # Chat & Call toggle buttons
+    # Chat & Call toggle buttons (fixed position)
     col1, col2, col3 = st.columns([19, 1, 1])
     with col2:
-        if st.button("💬", key="chat_toggle"):
+        if st.button("💬", key="chat_toggle", help="Open Chat"):
             st.session_state.chat_open = not st.session_state.chat_open
             st.rerun()
     with col3:
-        if st.button("☎️", key="call_toggle"):
+        if st.button("☎️", key="call_toggle", help="Schedule Call"):
             st.session_state.call_open = True
             st.session_state.chat_open = False
             st.rerun()
 
-    # Chat panel
+    # Floating chat widget
     if st.session_state.chat_open:
-        st.markdown("""<div class="messages-area">""", unsafe_allow_html=True)
-
-        # Display messages with premium styling
+        # Build messages HTML
+        messages_html = ""
         if len(st.session_state.messages) == 0:
-            st.markdown("""
-            <div style="text-align: center; color: #94a3b8; padding: 40px 20px;">
-                <p style="font-size: 32px; margin-bottom: 10px;">👋</p>
+            messages_html = """
+            <div class="empty-state">
+                <p style="font-size: 32px;">👋</p>
                 <p><strong>Start a conversation!</strong></p>
-                <p style="font-size: 13px;">Ask me anything about our services</p>
+                <p>Ask me anything</p>
             </div>
-            """, unsafe_allow_html=True)
+            """
+        else:
+            for msg in st.session_state.messages:
+                if msg["role"] == "user":
+                    text = msg['text'].replace('"', '&quot;')
+                    messages_html += f'<div class="message-item user-msg"><div class="msg-bubble user-bubble">👤 {text}</div></div>'
+                else:
+                    text = msg['text'].replace('"', '&quot;').replace('\n', '<br>')
+                    src = msg.get("source", "Support")
+                    messages_html += f'<div class="message-item bot-msg"><div class="msg-bubble bot-bubble"><strong>🤖</strong><br>{text}<span class="source-text">📚 {src}</span></div></div>'
 
-        for msg in st.session_state.messages:
-            if msg["role"] == "user":
-                st.markdown(f"""
-                <div class="message-bubble user-message">
-                    <div class="message-content user-content">
-                        👤 {msg['text']}
-                    </div>
+        # Render floating widget
+        st.markdown(f"""
+        <div class="floating-widget">
+            <div class="floating-header">
+                <div class="floating-header-text">
+                    <h3>🎯 Anamika</h3>
+                    <p><span class="status-badge"></span>Always here to help</p>
                 </div>
-                """, unsafe_allow_html=True)
-            else:
-                src = msg.get("source", "Support")
-                st.markdown(f"""
-                <div class="message-bubble bot-message">
-                    <div class="message-content bot-content">
-                        <strong>🤖 Anamika</strong><br>{msg['text']}
-                        <div class="message-source">📚 Source: {src}</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+            </div>
+            <div class="messages-scroll">{messages_html}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.markdown("""</div>""", unsafe_allow_html=True)
-
-        # Premium Chat input
+        # Chat input (below floating widget, but styled to match)
         col1, col2 = st.columns([5, 1])
         with col1:
-            user_input = st.text_input("", key="user_input_chat", placeholder="💭 Type your question here...", label_visibility="collapsed")
+            user_input = st.text_input("Message", key="float_input", placeholder="💭 Ask your question...", label_visibility="collapsed")
         with col2:
-            if st.button("📤 Send", key="send_btn_chat", use_container_width=True):
+            if st.button("Send", key="float_send"):
                 if user_input and user_input.strip():
-                    # Add user message
                     st.session_state.messages.append({"role": "user", "text": user_input})
-
-                    # Get bot response
                     bot_response, source = get_ai_response(user_input)
-
-                    # Add bot message
                     st.session_state.messages.append({"role": "bot", "text": bot_response, "source": source})
-
-                    # Rerun to clear input and show messages
                     st.rerun()
 
+        # JavaScript to scroll messages
         st.markdown("""
-            <div class="chat-footer-info">
-                ✨ Powered by AI - Instant Support | 🔒 Your messages are private
-            </div>
-        </div>
+        <script>
+            setTimeout(() => {
+                const scrollArea = document.querySelector('.messages-scroll');
+                if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight;
+            }, 100);
+        </script>
         """, unsafe_allow_html=True)
 
     # Call widget display
