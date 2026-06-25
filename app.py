@@ -102,10 +102,12 @@ def get_ai_response(message):
 st.markdown("""
 <style>
     * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
-    .stApp { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
-    h1 { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .premium-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; }
-    .stButton > button { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important; }
+    .stApp { background: #ffffff; }
+    h1 { color: #3b82f6; font-weight: 700; }
+    h2 { color: #3b82f6; }
+    h3 { color: #3b82f6; }
+    .premium-card { background: #f8f9fa; border: 2px solid #3b82f6; border-radius: 16px; padding: 20px; }
+    .stButton > button { background: #3b82f6 !important; color: white !important; }
 
     /* CHAT PANEL */
     .chat-panel {
@@ -311,17 +313,17 @@ def render_chat_widget():
 
     # Chat widget display
     if st.session_state.chat_open:
-        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:420px;max-height:600px;background:rgba(15,23,42,0.98);border:1px solid rgba(59,130,246,0.3);border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.6);backdrop-filter:blur(30px);display:flex;flex-direction:column;overflow:hidden;"><div style="background:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%);padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">🎯 Anamika</h3><p style="margin:4px 0 0 0;font-size:12px;">AI Support</p></div><div id="chat-messages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;height:350px;"></div><div style="padding:16px;border-top:1px solid rgba(59,130,246,0.2);display:flex;gap:10px;"><input type="text" id="chat-input" placeholder="Ask..." style="flex:1;padding:10px;background:rgba(30,41,59,0.8);border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:#f1f5f9;font-size:13px;"/><button onclick="sendChatMsg()" style="padding:10px 16px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600;">📤</button></div></div>', unsafe_allow_html=True)
+        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:420px;max-height:600px;background:#ffffff;border:2px solid #3b82f6;border-radius:20px;box-shadow:0 25px 60px rgba(59,130,246,0.2);backdrop-filter:blur(30px);display:flex;flex-direction:column;overflow:hidden;"><div style="background:#3b82f6;padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">🎯 Anamika</h3><p style="margin:4px 0 0 0;font-size:12px;">AI Support Assistant</p></div><div id="chat-messages" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;height:350px;"></div><div style="padding:16px;border-top:2px solid #3b82f6;display:flex;gap:10px;"><input type="text" id="chat-input" placeholder="Ask..." style="flex:1;padding:10px;background:#f8f9fa;border:1px solid #3b82f6;border-radius:8px;color:#1e293b;font-size:13px;"/><button onclick="sendChatMsg()" style="padding:10px 16px;background:#3b82f6;border:none;border-radius:8px;color:white;cursor:pointer;font-weight:600;">📤</button></div></div>', unsafe_allow_html=True)
 
         msgs_html = ""
         for msg in st.session_state.messages:
             if msg["role"] == "bot":
                 txt = msg["text"].replace('"', '&quot;').replace('\n', '<br>')
                 src = msg.get("source", "Support")
-                msgs_html += f'<div style="padding:10px;border-radius:10px;background:rgba(59,130,246,0.2);border-left:3px solid #3b82f6;color:#f1f5f9;max-width:85%;"><strong>🤖</strong><br>{txt}<br><span style="font-size:11px;color:#94a3b8;margin-top:4px;">📚 {src}</span></div>'
+                msgs_html += f'<div style="padding:12px;border-radius:12px;background:#e3f2fd;border-left:4px solid #3b82f6;color:#1e293b;max-width:85%;"><strong>🤖</strong><br>{txt}<br><span style="font-size:11px;color:#64748b;margin-top:8px;display:block;">📚 {src}</span></div>'
             else:
                 txt = msg["text"].replace('"', '&quot;')
-                msgs_html += f'<div style="padding:10px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;max-width:85%;align-self:flex-end;">{txt}</div>'
+                msgs_html += f'<div style="padding:12px;border-radius:12px;background:#3b82f6;color:white;max-width:85%;align-self:flex-end;">{txt}</div>'
 
         # Chat input below widget for message capture
         st.markdown("")  # Add spacing
@@ -340,15 +342,15 @@ def render_chat_widget():
 
     # Call widget display - using Streamlit form for better handling
     if st.session_state.call_open:
-        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:380px;background:rgba(15,23,42,0.98);border:1px solid rgba(34,197,94,0.3);border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.6);backdrop-filter:blur(30px);overflow:hidden;"><div style="background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">☎️ Schedule a Call</h3><p style="margin:4px 0 0 0;font-size:12px;">We\'ll call within 2 minutes</p></div></div>', unsafe_allow_html=True)
+        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:380px;background:#ffffff;border:2px solid #3b82f6;border-radius:20px;box-shadow:0 25px 60px rgba(59,130,246,0.2);backdrop-filter:blur(30px);overflow:hidden;"><div style="background:#3b82f6;padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">☎️ Schedule a Call</h3><p style="margin:4px 0 0 0;font-size:12px;">We\'ll call within 2 minutes</p></div></div>', unsafe_allow_html=True)
 
         col1, col2 = st.columns([4, 1])
         with col1:
             call_phone = st.text_input("Phone", placeholder="+1 (555) 123-4567", key="call_phone_input", label_visibility="collapsed")
         with col2:
-            if st.button("📞", key="submit_call", help="Schedule Call"):
+            if st.button("📞 Call", key="submit_call"):
                 if call_phone and call_phone.strip():
-                    st.success(f"✅ Call scheduled to {call_phone}! You'll receive a call within 2 minutes.")
+                    st.success(f"✅ Call scheduled! We'll call {call_phone} within 2 minutes.")
                     st.session_state.call_open = False
                     st.rerun()
                 else:
@@ -368,10 +370,10 @@ render_chat_widget()
 # Main pages
 if st.session_state.page == 'home':
     st.markdown("""
-    <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); border-radius: 20px; margin-bottom: 40px;">
-        <h1>🎯 Anamika</h1>
-        <p style="color: #94a3b8; font-size: 16px; margin-top: 12px;">Enterprise AI Support Platform</p>
-        <p style="color: #22c55e; font-size: 14px; margin-top: 16px; font-weight: 700;">💬 Click the chat button to start chatting!</p>
+    <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%); border: 2px solid #3b82f6; border-radius: 20px; margin-bottom: 40px;">
+        <h1 style="color: #3b82f6; font-size: 48px;">🎯 Anamika</h1>
+        <p style="color: #1e293b; font-size: 16px; margin-top: 12px;">Enterprise AI Support Platform</p>
+        <p style="color: #3b82f6; font-size: 14px; margin-top: 16px; font-weight: 700;">💬 Click the chat button to start chatting!</p>
     </div>
     """, unsafe_allow_html=True)
 
