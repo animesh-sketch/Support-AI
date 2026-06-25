@@ -737,166 +737,166 @@ def analytics_page():
 def admin_page():
     st.markdown("### ⚙️ Admin Panel")
 
-        tab1, tab2, tab3, tab4 = st.tabs(["📚 Knowledge Base", "🎤 Voice Config", "🤖 Bot Settings", "⚡ Advanced"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📚 Knowledge Base", "🎤 Voice Config", "🤖 Bot Settings", "⚡ Advanced"])
 
-        with tab1:
-            st.markdown("#### 📚 Knowledge Base Management")
-            st.markdown("""
+    with tab1:
+        st.markdown("#### 📚 Knowledge Base Management")
+        st.markdown("""
+        <div class="premium-card">
+            <p style="margin: 0; color: #22c55e; font-weight: 700;">✓ 💾 PERMANENT STORAGE ENABLED</p>
+            <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
+                All files are saved permanently and won't be deleted. Your KB is always available.
+            </p>
+            <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
+                <strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, CSV, XLS, XLSX, PPT, PPTX, JSON, XML
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("##### Upload Documents (Up to 5 files)")
+
+        # File uploader for multiple formats
+        col1, col2 = st.columns(2)
+        with col1:
+            uploaded_files = st.file_uploader(
+                "Choose files",
+                type=['pdf', 'doc', 'docx', 'txt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'json', 'xml'],
+                accept_multiple_files=True,
+                label_visibility="collapsed"
+            )
+
+            if uploaded_files:
+                st.markdown("**Uploading Files:**")
+                for file in uploaded_files:
+                    file_size = f"{file.size / 1024 / 1024:.1f}" if file.size < 10_000_000 else f"{file.size / 1024 / 1024 / 1024:.2f}"
+                    file_unit = "MB" if file.size < 10_000_000 else "GB"
+
+                    st.markdown(f"""
+                    <div class="premium-card" style="padding: 12px; margin: 8px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <p style="margin: 0; font-weight: 700;">📄 {file.name}</p>
+                                <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 12px;">{file_size} {file_unit}</p>
+                            </div>
+                            <span style="color: #22c55e; font-weight: 700;">✓</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                if st.button("✅ Upload All Files", use_container_width=True, key="upload_kb"):
+                    uploaded_count = 0
+                    for file in uploaded_files:
+                        file_size = f"{file.size / 1024:.1f} KB" if file.size < 1_000_000 else f"{file.size / 1024 / 1024:.1f} MB"
+                        file_type = file.name.split('.')[-1].upper()
+                        if add_kb_file(file.name, file_size, file_type, "Active"):
+                            uploaded_count += 1
+                    st.session_state.kb_files = get_kb_files()
+                    st.success(f"✅ {uploaded_count} file(s) uploaded and saved permanently!")
+                    st.rerun()
+
+        with col2:
+            st.markdown("**Storage Status**")
+            st.markdown(f"""
             <div class="premium-card">
-                <p style="margin: 0; color: #22c55e; font-weight: 700;">✓ 💾 PERMANENT STORAGE ENABLED</p>
-                <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
-                    All files are saved permanently and won't be deleted. Your KB is always available.
-                </p>
-                <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
-                    <strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, CSV, XLS, XLSX, PPT, PPTX, JSON, XML
-                </p>
+                <div style="text-align: center;">
+                    <p style="margin: 0; font-size: 24px; font-weight: 900; color: #22c55e;">✓ {len(st.session_state.kb_files)}</p>
+                    <p style="margin: 6px 0 0 0; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Files Permanently Stored</p>
+                </div>
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.2);">
+                    <p style="margin: 0; font-size: 12px; color: #22c55e;"><strong>💾 Persistent Storage:</strong> Active</p>
+                    <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Max Files:</strong> 5</p>
+                    <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Available Slots:</strong> {5 - len(st.session_state.kb_files)}</p>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
-            st.markdown("##### Upload Documents (Up to 5 files)")
+        st.markdown("---")
+        st.markdown("##### 📋 Knowledge Base Files")
 
-            # File uploader for multiple formats
-            col1, col2 = st.columns(2)
-            with col1:
-                uploaded_files = st.file_uploader(
-                    "Choose files",
-                    type=['pdf', 'doc', 'docx', 'txt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx', 'json', 'xml'],
-                    accept_multiple_files=True,
+        if len(st.session_state.kb_files) == 0:
+            st.info("📚 No files uploaded yet. Upload files above to get started!")
+        else:
+            # Display KB files in a table
+            kb_data = {
+                "📄 File Name": [f["name"] for f in st.session_state.kb_files],
+                "📊 Type": [f["type"] for f in st.session_state.kb_files],
+                "💾 Size": [f["size"] for f in st.session_state.kb_files],
+                "📅 Date": [f["date"] for f in st.session_state.kb_files],
+                "✓ Status": [f["status"] for f in st.session_state.kb_files],
+            }
+            df = pd.DataFrame(kb_data)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+            st.markdown("**File Actions:**")
+            col_action1, col_action2, col_action3 = st.columns(3)
+
+            with col_action1:
+                if st.button("🔍 View Files", use_container_width=True):
+                    st.info("📂 Viewing all files in Knowledge Base...")
+
+            with col_action2:
+                file_to_delete = st.selectbox(
+                    "Delete file",
+                    options=[f["name"] for f in st.session_state.kb_files],
                     label_visibility="collapsed"
                 )
+                if st.button("🗑️ Delete Selected", use_container_width=True):
+                    delete_kb_file(file_to_delete)
+                    st.session_state.kb_files = get_kb_files()
+                    st.success(f"✅ {file_to_delete} deleted!")
+                    st.rerun()
 
-                if uploaded_files:
-                    st.markdown("**Uploading Files:**")
-                    for file in uploaded_files:
-                        file_size = f"{file.size / 1024 / 1024:.1f}" if file.size < 10_000_000 else f"{file.size / 1024 / 1024 / 1024:.2f}"
-                        file_unit = "MB" if file.size < 10_000_000 else "GB"
+            with col_action3:
+                if st.button("📊 Analytics", use_container_width=True):
+                    st.info("📈 KB usage analytics coming soon...")
 
-                        st.markdown(f"""
-                        <div class="premium-card" style="padding: 12px; margin: 8px 0;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <p style="margin: 0; font-weight: 700;">📄 {file.name}</p>
-                                    <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 12px;">{file_size} {file_unit}</p>
-                                </div>
-                                <span style="color: #22c55e; font-weight: 700;">✓</span>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+    with tab2:
+        st.markdown("#### 🎤 Voice Configuration (Convin Sense)")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.text_input("Workspace ID", placeholder="workspace_xyz", label_visibility="collapsed")
+            st.text_input("API Key", placeholder="sk-sense-...", type="password", label_visibility="collapsed")
+        with col2:
+            st.toggle("Enable Inbound Calls", value=True)
+            st.toggle("Enable Outbound Calls", value=True)
 
-                    if st.button("✅ Upload All Files", use_container_width=True, key="upload_kb"):
-                        uploaded_count = 0
-                        for file in uploaded_files:
-                            file_size = f"{file.size / 1024:.1f} KB" if file.size < 1_000_000 else f"{file.size / 1024 / 1024:.1f} MB"
-                            file_type = file.name.split('.')[-1].upper()
-                            if add_kb_file(file.name, file_size, file_type, "Active"):
-                                uploaded_count += 1
-                        st.session_state.kb_files = get_kb_files()
-                        st.success(f"✅ {uploaded_count} file(s) uploaded and saved permanently!")
-                        st.rerun()
+        st.selectbox("Default Voice", ["Male (Professional)", "Female (Friendly)", "AI (Natural)"], label_visibility="collapsed")
+        st.slider("Speech Rate", 0.5, 2.0, 1.0)
 
-            with col2:
-                st.markdown("**Storage Status**")
-                st.markdown(f"""
-                <div class="premium-card">
-                    <div style="text-align: center;">
-                        <p style="margin: 0; font-size: 24px; font-weight: 900; color: #22c55e;">✓ {len(st.session_state.kb_files)}</p>
-                        <p style="margin: 6px 0 0 0; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Files Permanently Stored</p>
-                    </div>
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.2);">
-                        <p style="margin: 0; font-size: 12px; color: #22c55e;"><strong>💾 Persistent Storage:</strong> Active</p>
-                        <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Max Files:</strong> 5</p>
-                        <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Available Slots:</strong> {5 - len(st.session_state.kb_files)}</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+        if st.button("💾 Save Voice Config", use_container_width=True):
+            st.success("✅ Voice configuration saved!")
 
-            st.markdown("---")
-            st.markdown("##### 📋 Knowledge Base Files")
+    with tab3:
+        st.markdown("#### 🤖 Bot Settings")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.toggle("Use Knowledge Base", value=True)
+            st.toggle("Auto-escalation", value=True)
+        with col2:
+            st.toggle("Log Conversations", value=True)
+            st.toggle("Enable Feedback", value=True)
 
-            if len(st.session_state.kb_files) == 0:
-                st.info("📚 No files uploaded yet. Upload files above to get started!")
-            else:
-                # Display KB files in a table
-                kb_data = {
-                    "📄 File Name": [f["name"] for f in st.session_state.kb_files],
-                    "📊 Type": [f["type"] for f in st.session_state.kb_files],
-                    "💾 Size": [f["size"] for f in st.session_state.kb_files],
-                    "📅 Date": [f["date"] for f in st.session_state.kb_files],
-                    "✓ Status": [f["status"] for f in st.session_state.kb_files],
-                }
-                df = pd.DataFrame(kb_data)
-                st.dataframe(df, use_container_width=True, hide_index=True)
+        st.slider("Confidence Threshold (%)", 0, 100, 75)
+        st.slider("Response Timeout (seconds)", 5, 120, 45)
 
-                st.markdown("**File Actions:**")
-                col_action1, col_action2, col_action3 = st.columns(3)
+        if st.button("💾 Save Bot Settings", use_container_width=True):
+            st.success("✅ Bot settings saved!")
 
-                with col_action1:
-                    if st.button("🔍 View Files", use_container_width=True):
-                        st.info("📂 Viewing all files in Knowledge Base...")
+    with tab4:
+        st.markdown("#### ⚡ Advanced Settings")
+        st.markdown("""
+        <div class="premium-card">
+            <p><strong>🔐 Security</strong></p>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Enable two-factor authentication and security logs</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-                with col_action2:
-                    file_to_delete = st.selectbox(
-                        "Delete file",
-                        options=[f["name"] for f in st.session_state.kb_files],
-                        label_visibility="collapsed"
-                    )
-                    if st.button("🗑️ Delete Selected", use_container_width=True):
-                        delete_kb_file(file_to_delete)
-                        st.session_state.kb_files = get_kb_files()
-                        st.success(f"✅ {file_to_delete} deleted!")
-                        st.rerun()
+        st.toggle("🔐 Enable 2FA", value=False)
+        st.toggle("📝 Enable Audit Logs", value=True)
+        st.toggle("🔒 Enable IP Whitelist", value=False)
 
-                with col_action3:
-                    if st.button("📊 Analytics", use_container_width=True):
-                        st.info("📈 KB usage analytics coming soon...")
-
-        with tab2:
-            st.markdown("#### 🎤 Voice Configuration (Convin Sense)")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.text_input("Workspace ID", placeholder="workspace_xyz", label_visibility="collapsed")
-                st.text_input("API Key", placeholder="sk-sense-...", type="password", label_visibility="collapsed")
-            with col2:
-                st.toggle("Enable Inbound Calls", value=True)
-                st.toggle("Enable Outbound Calls", value=True)
-
-            st.selectbox("Default Voice", ["Male (Professional)", "Female (Friendly)", "AI (Natural)"], label_visibility="collapsed")
-            st.slider("Speech Rate", 0.5, 2.0, 1.0)
-
-            if st.button("💾 Save Voice Config", use_container_width=True):
-                st.success("✅ Voice configuration saved!")
-
-        with tab3:
-            st.markdown("#### 🤖 Bot Settings")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.toggle("Use Knowledge Base", value=True)
-                st.toggle("Auto-escalation", value=True)
-            with col2:
-                st.toggle("Log Conversations", value=True)
-                st.toggle("Enable Feedback", value=True)
-
-            st.slider("Confidence Threshold (%)", 0, 100, 75)
-            st.slider("Response Timeout (seconds)", 5, 120, 45)
-
-            if st.button("💾 Save Bot Settings", use_container_width=True):
-                st.success("✅ Bot settings saved!")
-
-        with tab4:
-            st.markdown("#### ⚡ Advanced Settings")
-            st.markdown("""
-            <div class="premium-card">
-                <p><strong>🔐 Security</strong></p>
-                <p style="color: var(--text-muted); font-size: 13px; margin-top: 6px;">Enable two-factor authentication and security logs</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.toggle("🔐 Enable 2FA", value=False)
-            st.toggle("📝 Enable Audit Logs", value=True)
-            st.toggle("🔒 Enable IP Whitelist", value=False)
-
-            if st.button("💾 Save Advanced Settings", use_container_width=True):
-                st.success("✅ Advanced settings saved!")
+        if st.button("💾 Save Advanced Settings", use_container_width=True):
+            st.success("✅ Advanced settings saved!")
 
         st.markdown("---")
         if st.button("Back to Home", use_container_width=True):
