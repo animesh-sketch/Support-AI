@@ -1,29 +1,63 @@
-# 🚀 Convin AI Support Console
+# 🎯 Anamika - Enterprise Support Widget
 
-Enterprise-grade support platform with AI intelligence, built with Streamlit.
+Premium floating support widget with Chat, Voice, Knowledge Base, Admin Panel, and Advanced Analytics. Built with Streamlit × Convin AI.
 
 ## ✨ Features
 
-- 💬 **AI Chat Support** - Instant responses powered by Claude AI
-- ☎️ **Voice Call Integration** - Schedule calls with support team
-- 📊 **Analytics Dashboard** - Real-time metrics & insights
-- 🤖 **AI Agent** - Automated ticket handling & escalation
-- 📚 **Knowledge Base** - Document management (admin)
-- 🎨 **Premium UI** - Glassmorphism design with animations
-- 🔐 **Secure** - No API keys exposed, password protected
-- 📱 **Responsive** - Mobile & desktop optimized
-- 🚀 **Instant Deploy** - Push to Streamlit Cloud in seconds
+### 🎯 Core Widget
+- **Floating Widget** - Bottom-right corner, always accessible
+- **Notification Badge** - Unread message counter
+- **Premium Design** - Glassmorphism with smooth animations
+
+### 💬 Chat Support
+- **AI-Powered** - Claude AI instant responses
+- **Human Escalation** - Seamless agent transfer
+- **Full History** - Persistent conversation logs
+
+### ☎️ Voice Integration
+- **Convin Sense API** - Crystal-clear voice calls
+- **Call Scheduling** - Callback requests with time slots
+- **Call Analytics** - Success rates & duration tracking
+
+### 📚 Knowledge Base (Admin Only)
+- **Multi-format Support** - PDF, DOC, DOCX, TXT, CSV, XLS, XLSX, PPT, PPTX, URLs
+- **Smart Retrieval** - AI references KB before responding
+- **Usage Analytics** - Track deflection rates & popular articles
+
+### 📊 Advanced Analytics
+- **Real-time Dashboard** - Conversations, resolution rates, CSAT
+- **Chat Intelligence** - Message volume, response times, sentiment
+- **Voice Intelligence** - Call success rates, duration, connected calls
+- **KB Analytics** - Article views, deflection metrics, hit rates
+- **Agent Performance** - Handling time, satisfaction scores, FCR
+
+### 🔐 Admin Panel (Protected)
+- **Knowledge Base Management** - Upload, edit, version documents
+- **Voice Configuration** - Convin Sense API setup & controls
+- **Agent Routing** - Assign agents with skills & availability
+- **Escalation Rules** - Smart routing based on triggers
+- **Business Hours** - Configure availability & after-hours messaging
+- **Bot Controls** - Confidence thresholds, conversation limits, timeouts
+
+### ✨ Enterprise Features
+- **Auto-Escalation** - Confidence-based intelligent routing
+- **Conversation Logging** - Audit trail & compliance
+- **Feedback Collection** - CSAT surveys & sentiment tracking
+- **Multi-agent Routing** - Load balancing & skill-based assignment
+- **SLA Tracking** - Response & resolution time monitoring
 
 ## 📦 What's Included
 
-| File | Purpose | Notes |
-|------|---------|-------|
-| `app_premium.py` | **⭐ RECOMMENDED** - Premium UI | Best design, start here |
-| `app_advanced.py` | Full enterprise features | Predictive analytics, SLA rules |
-| `app.py` | Standard version | Core functionality |
-| `requirements.txt` | Dependencies | Minimal, fast install |
-| `.streamlit/config.toml` | Config file | Theme, port, caching |
-| `.gitignore` | Security | Prevents secrets commit |
+| File | Purpose |
+|------|---------|
+| **app.py** | ⭐ **ANAMIKA** - Main floating widget with all features |
+| `app_premium.py` | Premium UI version (archived) |
+| `app_advanced.py` | Advanced analytics version (archived) |
+| `requirements.txt` | Dependencies (streamlit, pandas, plotly) |
+| `.streamlit/config.toml` | Streamlit theme & config |
+| `.gitignore` | Security (no secrets committed) |
+
+**Run the main app.py to launch Anamika!**
 
 ## 🚀 Quick Start (60 seconds)
 
@@ -33,29 +67,30 @@ Enterprise-grade support platform with AI intelligence, built with Streamlit.
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the app
-streamlit run app_premium.py
+# Run Anamika widget
+streamlit run app.py
 ```
 
 Visit: **http://localhost:8501**
 
+The **🎯 floating widget** is in the bottom-right corner!
+
 ### Deploy to Streamlit Cloud
 
-See **[DEPLOY.md](DEPLOY.md)** for step-by-step instructions.
-
 ```bash
-# Or deploy directly from CLI
-streamlit deploy
+git push origin main
+# Then go to https://streamlit.io/cloud and deploy
 ```
 
-Live URL will be: `https://share.streamlit.io/animesh-sketch/Support-AI/main/app_premium.py`
+Live at: `https://share.streamlit.io/animesh-sketch/Support-AI/main/app.py`
 
-## 🎯 Default Credentials
+## 🔐 Admin Credentials
 
-- **Username**: `admin`
-- **Password**: `admin123`
+**Access Admin Panel:**
+- Click **Home** → **🔐 Admin**
+- Password: `admin@anamika`
 
-⚠️ **Change these in Settings after login!**
+⚠️ **Change admin password in production!**
 
 ## 🔒 Security
 
