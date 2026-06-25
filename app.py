@@ -4,33 +4,6 @@ import streamlit as st
 st.set_page_config(page_title="Support Platform", page_icon="💬", layout="wide")
 
 # ============================================================================
-# PASSWORD PROTECTION
-# ============================================================================
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-
-def check_password():
-    if st.session_state.authenticated:
-        return True
-
-    st.markdown("# 🔐 Support Platform")
-
-    password = st.text_input("Enter Password:", type="password", placeholder="Enter admin password")
-
-    if st.button("Login"):
-        if password == "admin123":
-            st.session_state.authenticated = True
-            st.success("✅ Logged in!")
-            st.rerun()
-        else:
-            st.error("❌ Wrong password. Try: admin123")
-
-    st.info("Demo password: **admin123**")
-    st.stop()
-
-check_password()
-
-# ============================================================================
 # MAIN APP
 # ============================================================================
 
@@ -158,26 +131,11 @@ elif mode == "Dashboard":
 elif mode == "Settings":
     st.markdown("# ⚙️ Settings")
 
-    tab1, tab2 = st.tabs(["Security", "API"])
+    st.subheader("API Configuration")
+    api_url = st.text_input("API URL", value="http://localhost:3000")
 
-    with tab1:
-        st.subheader("Change Password")
-        current = st.text_input("Current Password", type="password")
-        new = st.text_input("New Password", type="password")
-        confirm = st.text_input("Confirm Password", type="password")
-
-        if st.button("Change Password"):
-            if current == "admin123" and new == confirm and len(new) >= 6:
-                st.success("✅ Password changed!")
-            else:
-                st.error("❌ Error: Check current password or new password match")
-
-    with tab2:
-        st.subheader("API Configuration")
-        api_url = st.text_input("API URL", value="http://localhost:3000")
-
-        if st.button("Save"):
-            st.success("✅ Saved!")
+    if st.button("💾 Save"):
+        st.success("✅ Saved!")
 
 # Footer
 st.divider()
