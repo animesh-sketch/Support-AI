@@ -157,69 +157,81 @@ Performance Issues:
 
 def search_kb(user_query):
     """Search Knowledge Base for relevant documents"""
-    user_query_lower = user_query.lower()
-    results = []
+    try:
+        user_query_lower = user_query.lower().strip()
+        results = []
 
-    for doc_name, doc_data in KB_CONTENT.items():
-        match_score = 0
+        for doc_name, doc_data in KB_CONTENT.items():
+            match_score = 0
 
-        # Check keyword matches
-        for keyword in doc_data["keywords"]:
-            if keyword in user_query_lower:
-                match_score += 2
+            # Check keyword matches (highest priority)
+            for keyword in doc_data.get("keywords", []):
+                if keyword in user_query_lower:
+                    match_score += 3
 
-        # Check title match
-        if doc_data["title"].lower() in user_query_lower:
-            match_score += 3
+            # Check title match
+            if doc_data.get("title", "").lower() in user_query_lower:
+                match_score += 4
 
-        # Check content relevance
-        words = user_query_lower.split()
-        for word in words:
-            if len(word) > 3 and word in doc_data["content"].lower():
-                match_score += 1
+            # Check content relevance - word by word
+            words = user_query_lower.split()
+            content_lower = doc_data.get("content", "").lower()
+            for word in words:
+                if len(word) > 2:  # Only match words longer than 2 chars
+                    if word in content_lower:
+                        match_score += 1
 
-        if match_score > 0:
-            results.append({
-                "document": doc_name,
-                "title": doc_data["title"],
-                "content": doc_data["content"],
-                "score": match_score
-            })
+            if match_score > 0:
+                results.append({
+                    "document": doc_name,
+                    "title": doc_data.get("title", "Unknown"),
+                    "content": doc_data.get("content", ""),
+                    "score": match_score
+                })
 
-    # Sort by relevance score
-    results.sort(key=lambda x: x["score"], reverse=True)
-    return results
+        # Sort by relevance score
+        results.sort(key=lambda x: x.get("score", 0), reverse=True)
+        return results
+    except Exception as e:
+        return []
 
 def get_support_response(user_message):
     """Get support agent response from KB or generate intelligent response"""
-    # Search KB for relevant documents
-    kb_results = search_kb(user_message)
+    try:
+        # Search KB for relevant documents
+        kb_results = search_kb(user_message)
 
-    if kb_results and kb_results[0]["score"] > 0:
-        # Found relevant KB document
-        top_result = kb_results[0]
-        response = f"""Based on our Knowledge Base ({top_result['title']}):
-
-{top_result['content']}
-
----
-📚 Source: {top_result['title']}"""
-        return response, top_result["title"]
-    else:
-        # No KB match - provide intelligent response
-        user_lower = user_message.lower()
-
-        if any(word in user_lower for word in ["hello", "hi", "hey", "greet"]):
-            return "👋 Hello! Welcome to Anamika Support. How can I assist you today? I'm here to help with questions about passwords, billing, API integration, troubleshooting, and more!", "General Support"
-
-        elif any(word in user_lower for word in ["help", "support", "assist", "issue"]):
-            return "I'm here to help! You can ask me about:\n• Password reset\n• Billing & payments\n• API documentation\n• Troubleshooting\n\nWhat would you like help with?", "Help Center"
-
-        elif any(word in user_lower for word in ["agent", "human", "person", "talk to", "speak"]):
-            return "👤 Sure! I can connect you with a human support agent. They'll be available shortly to help with your specific needs.", "Agent Escalation"
-
+        if kb_results and len(kb_results) > 0 and kb_results[0].get("score", 0) > 0:
+            # Found relevant KB document
+            top_result = kb_results[0]
+            response = f"Based on our Knowledge Base:\n\n{top_result['content']}"
+            return response, top_result["title"]
         else:
-            return "I understand you're asking about that topic. While I don't have specific documentation available, let me connect you with a human support agent who can provide personalized assistance. Would you like me to escalate your question?", "General Support"
+            # No KB match - provide intelligent response
+            user_lower = user_message.lower().strip()
+
+            # Greetings
+            if any(word in user_lower for word in ["hello", "hi", "hey", "greetings", "what's up"]):
+                return "👋 Hello! Welcome to Anamika Support. How can I assist you today? I'm here to help with:\n• Password reset & account access\n• Billing & subscription questions\n• API integration & documentation\n• Troubleshooting issues\n\nWhat would you like help with?", "Welcome"
+
+            # Help requests
+            elif any(word in user_lower for word in ["help", "support", "assist", "issue", "problem", "error"]):
+                return "I'm here to help! You can ask me about:\n\n✓ Password reset\n✓ Billing & payments\n✓ API documentation\n✓ Troubleshooting\n✓ Account issues\n\nJust type your question and I'll find the answer for you!", "Help Center"
+
+            # Agent escalation
+            elif any(word in user_lower for word in ["agent", "human", "person", "talk to", "speak", "person"]):
+                return "👤 Sure! I can connect you with a human support agent right away. They'll be available shortly to help with your specific needs. Would you like me to escalate your question?", "Agent Escalation"
+
+            # Thank you
+            elif any(word in user_lower for word in ["thanks", "thank you", "appreciate"]):
+                return "😊 You're welcome! If you have any other questions, feel free to ask. I'm here to help!", "Support"
+
+            # Default response
+            else:
+                return f"I understand you're asking about that. Let me search our Knowledge Base for relevant information. If you could be more specific (like mentioning 'password', 'billing', 'API', or 'troubleshooting'), I can provide better answers. Or would you like me to connect you with a human support agent?", "Support"
+
+    except Exception as e:
+        return f"Sorry, I encountered an issue processing your request. Let me connect you with a human support agent who can better assist you.", "Error Handling"
 
 # ============================================================================
 # DESIGN SYSTEM
@@ -538,27 +550,33 @@ def render_widget():
             const callBtn = document.getElementById('call-btn');
             const agentBtn = document.getElementById('agent-btn');
 
-            // Toggle widget
-            btn.addEventListener('click', () => {
-                chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
-                if (chat.style.display === 'flex') {
-                    msgInput.focus();
-                }
-            });
+            if (btn && chat) {
+                // Toggle widget
+                btn.addEventListener('click', () => {
+                    chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
+                    if (chat.style.display === 'flex' && msgInput) {
+                        setTimeout(() => msgInput.focus(), 100);
+                    }
+                });
 
-            // Close widget
-            closeBtn.addEventListener('click', () => {
-                chat.style.display = 'none';
-            });
+                // Close widget
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        chat.style.display = 'none';
+                    });
+                }
+            }
 
             // Smooth scroll to bottom
             function scrollToBottom() {
                 const messages = document.getElementById('messages');
-                messages.scrollTop = messages.scrollHeight;
+                if (messages) {
+                    messages.scrollTop = messages.scrollHeight;
+                }
             }
 
             setTimeout(scrollToBottom, 100);
-        }, 500);
+        }, 300);
     </script>
     """, unsafe_allow_html=True)
 
@@ -617,6 +635,15 @@ def chat_page():
     st.markdown("""
     <div class="premium-card">
         <p style="margin: 0;">🤖 <strong>Anamika Support Agent</strong> • Powered by Knowledge Base • Response Time: <strong>Instant</strong></p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); padding: 12px; border-radius: 10px; margin-bottom: 16px;">
+        <p style="margin: 0; font-size: 12px; color: #22c55e;"><strong>💡 Try asking:</strong></p>
+        <p style="margin: 6px 0 0 0; font-size: 12px; color: var(--text-muted);">
+            "How do I reset my password?" • "What's your billing?" • "API documentation" • "Troubleshooting"
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
