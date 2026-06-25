@@ -182,95 +182,78 @@ st.markdown("""
         margin: 24px 0;
     }
 
-    /* Floating Widget */
+    /* Floating Widget - Truly Fixed in Corner */
     .floating-widget {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 9999;
-    }
-
-    .widget-button {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        border: none;
-        color: white;
-        font-size: 28px;
-        cursor: pointer;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .widget-button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 30px rgba(59, 130, 246, 0.7);
+        position: fixed !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        z-index: 99999 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .widget-menu {
-        position: absolute;
-        bottom: 80px;
-        right: 0;
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 12px;
-        padding: 12px;
-        min-width: 180px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .widget-option {
-        display: block;
-        width: 100%;
-        padding: 12px 16px;
-        margin: 6px 0;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.2s ease;
-        text-align: left;
-        font-size: 14px;
-    }
-
-    .widget-option:hover {
-        transform: translateX(-4px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    }
-
-    .widget-close {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        background: none;
-        border: none;
-        color: #94a3b8;
-        font-size: 18px;
-        cursor: pointer;
-        padding: 4px;
+        background: rgba(15, 23, 42, 0.98) !important;
+        border: 1px solid rgba(148, 163, 184, 0.3) !important;
+        border-radius: 12px !important;
+        padding: 16px !important;
+        min-width: 220px !important;
+        backdrop-filter: blur(20px) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        margin-bottom: 12px !important;
     }
 
     .widget-badge {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #ef4444;
-        color: white;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 700;
+        position: absolute !important;
+        top: -8px !important;
+        right: -8px !important;
+        background: #ef4444 !important;
+        color: white !important;
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+    }
+
+    .floating-widget button {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 12px 24px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+        margin: 6px 0 !important;
+        width: 100% !important;
+        font-size: 14px !important;
+    }
+
+    .floating-widget button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5) !important;
+    }
+
+    /* Chat button - larger circle */
+    .floating-widget button:first-of-type {
+        width: 70px !important;
+        height: 70px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        font-size: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .floating-widget button:first-of-type:hover {
+        transform: scale(1.1) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -301,37 +284,56 @@ if 'chat_history' not in st.session_state:
 # FLOATING WIDGET
 # ============================================================================
 def render_floating_widget():
-    # Hidden container for widget positioning
-    st.markdown("""
-    <div class="floating-widget" style="display: flex; flex-direction: column-reverse; gap: 10px;">
-    """, unsafe_allow_html=True)
-
     if st.session_state.widget_open:
-        # Widget menu (open state)
-        col1, col2 = st.columns(2)
+        # Open state - show menu
+        st.markdown("""
+        <div class="floating-widget">
+            <div class="widget-menu" style="display: block;">
+                <h4 style="margin: 0 0 12px 0; color: #f1f5f9; font-size: 14px; font-weight: 600;">
+                    How can we help?
+                </h4>
+        """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2, gap="small")
         with col1:
-            if st.button("💬 Chat", key="widget_chat_btn", use_container_width=True):
+            if st.button("💬 Chat", key="widget_chat", use_container_width=True):
                 st.session_state.current_page = 'chat'
                 st.session_state.widget_open = False
                 st.rerun()
 
         with col2:
-            if st.button("☎️ Call", key="widget_call_btn", use_container_width=True):
+            if st.button("☎️ Call", key="widget_call", use_container_width=True):
                 st.session_state.widget_open = False
-                st.info("📞 Initiating call...")
                 st.rerun()
 
+        st.markdown("""
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
         # Close button
-        if st.button("✕ Close", key="widget_close_btn", use_container_width=True):
+        if st.button("Close Widget", key="close_widget", use_container_width=True):
             st.session_state.widget_open = False
             st.rerun()
+
     else:
-        # Widget button (closed state)
-        if st.button("💬 Support (2)", key="widget_open_btn", use_container_width=True):
+        # Closed state - show floating button
+        st.markdown("""
+        <div class="floating-widget">
+            <div style="text-align: center;">
+                <div style="position: relative; display: inline-block;">
+                    <span class="widget-badge">2</span>
+        """, unsafe_allow_html=True)
+
+        if st.button("💬", key="open_widget", help="Open Support Widget"):
             st.session_state.widget_open = True
             st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ============================================================================
 # HEADER
