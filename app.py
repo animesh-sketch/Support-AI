@@ -119,13 +119,23 @@ st.markdown("""
     }
 
     /* ============================================================================
-    ANAMIKA WIDGET - CLASSY & SMOOTH
+    ANAMIKA WIDGET - CLASSY & SMOOTH - FIXED RIGHT CORNER
     ============================================================================ */
 
-    #anamika-widget {
+    #anamika-widget-container {
         position: fixed !important;
-        bottom: 24px !important;
-        right: 24px !important;
+        top: 30px !important;
+        right: 30px !important;
+        z-index: 999999 !important;
+        font-family: 'Inter', sans-serif !important;
+        width: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #anamika-widget {
+        position: relative !important;
         z-index: 999999 !important;
         font-family: 'Inter', sans-serif !important;
     }
@@ -216,7 +226,7 @@ st.markdown("""
 
     .anamika-menu {
         position: fixed !important;
-        bottom: 100px !important;
+        top: 100px !important;
         right: 20px !important;
         background: rgba(15, 23, 42, 0.95) !important;
         border: 1px solid rgba(59, 130, 246, 0.3) !important;
@@ -229,7 +239,7 @@ st.markdown("""
         z-index: 999998 !important;
         pointer-events: auto !important;
         opacity: 0 !important;
-        transform: translateY(20px) scale(0.95) !important;
+        transform: translateY(-20px) scale(0.95) !important;
         transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
     }
 
