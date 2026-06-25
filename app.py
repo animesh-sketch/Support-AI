@@ -323,10 +323,20 @@ def render_chat_widget():
                 txt = msg["text"].replace('"', '&quot;')
                 msgs_html += f'<div style="padding:10px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:white;max-width:85%;align-self:flex-end;">{txt}</div>'
 
-        st.markdown(f'<script>let m=document.getElementById("chat-messages");m.innerHTML="{msgs_html}";m.scrollTop=m.scrollHeight;function sendChatMsg(){{let i=document.getElementById("chat-input");if(i.value.trim()){{document.getElementById("send-chat").click();i.value=""}}}}; document.getElementById("chat-input").addEventListener("keypress",e=>{{if(e.key==="Enter")sendChatMsg()}});</script>', unsafe_allow_html=True)
+        # Chat input below widget for message capture
+        st.markdown("")  # Add spacing
+        col1, col2 = st.columns([5, 1])
+        with col1:
+            widget_input = st.text_input("💬 Ask Anamika", placeholder="Type your question...", key="floating_chat_input", label_visibility="collapsed")
+        with col2:
+            if st.button("Send", key="floating_send"):
+                if widget_input and widget_input.strip():
+                    st.session_state.messages.append({"role": "user", "text": widget_input})
+                    response, source = get_ai_response(widget_input)
+                    st.session_state.messages.append({"role": "bot", "text": response, "source": source})
+                    st.rerun()
 
-        if st.button("Send", key="send-chat"):
-            pass
+        st.markdown(f'<script>let m=document.getElementById("chat-messages");m.innerHTML="{msgs_html}";m.scrollTop=m.scrollHeight;</script>', unsafe_allow_html=True)
 
     # Call widget display - using Streamlit form for better handling
     if st.session_state.call_open:
@@ -354,18 +364,6 @@ def render_chat_widget():
 
 # Render chat widget on all pages
 render_chat_widget()
-
-# Hidden input for chat
-col1, col2 = st.columns([5, 1])
-with col1:
-    chat_msg = st.text_input("Message", key="chat_input", label_visibility="collapsed")
-with col2:
-    if st.button("Send", key="send_main"):
-        if chat_msg and chat_msg.strip():
-            st.session_state.messages.append({"role": "user", "text": chat_msg})
-            response, source = get_ai_response(chat_msg)
-            st.session_state.messages.append({"role": "bot", "text": response, "source": source})
-            st.rerun()
 
 # Main pages
 if st.session_state.page == 'home':
