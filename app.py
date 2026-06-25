@@ -265,6 +265,8 @@ if 'page' not in st.session_state:
     st.session_state.page = 'home'
 if 'chat_open' not in st.session_state:
     st.session_state.chat_open = False
+if 'call_open' not in st.session_state:
+    st.session_state.call_open = False
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'kb_files' not in st.session_state:
@@ -280,11 +282,16 @@ if 'kb_files' not in st.session_state:
 def render_chat_widget():
     """Render the professional chat widget"""
 
-    # Chat toggle button
-    col1, col2 = st.columns([20, 1])
+    # Chat & Call toggle buttons
+    col1, col2, col3 = st.columns([19, 1, 1])
     with col2:
         if st.button("💬", key="chat_toggle", help="Toggle Chat"):
             st.session_state.chat_open = not st.session_state.chat_open
+            st.rerun()
+    with col3:
+        if st.button("☎️", key="call_toggle", help="Schedule Call"):
+            st.session_state.call_open = True
+            st.session_state.chat_open = False
             st.rerun()
 
     # Chat widget display
@@ -305,6 +312,24 @@ def render_chat_widget():
 
         if st.button("Send", key="send-chat"):
             pass
+
+    # Call widget display
+    if st.session_state.call_open:
+        st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:380px;background:rgba(15,23,42,0.98);border:1px solid rgba(34,197,94,0.3);border-radius:20px;box-shadow:0 25px 60px rgba(0,0,0,0.6);backdrop-filter:blur(30px);display:flex;flex-direction:column;overflow:hidden;"><div style="background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">☎️ Schedule Call</h3><p style="margin:4px 0 0 0;font-size:12px;">Quick callback</p></div><div style="padding:20px;"><p style="color:#94a3b8;font-size:13px;margin-bottom:12px;">Get a call from our support team</p></div></div>', unsafe_allow_html=True)
+
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            phone = st.text_input("Phone Number", placeholder="+1 (555) 000-0000", label_visibility="collapsed")
+        with col2:
+            if st.button("📞 Call Me", use_container_width=True):
+                if phone and phone.strip():
+                    st.success(f"✅ Call scheduled! We'll call {phone} within 2 minutes")
+                    st.session_state.call_open = False
+                    st.rerun()
+
+        if st.button("Close Call", key="close_call"):
+            st.session_state.call_open = False
+            st.rerun()
 
 # ============================================================================
 # MAIN APP
@@ -385,9 +410,46 @@ elif st.session_state.page == 'admin':
     with tab1:
         st.markdown("#### Knowledge Base Management")
         st.metric("Files Stored", len(st.session_state.kb_files), "/ 5")
+
+        st.markdown("---")
+        st.markdown("**📁 Upload New File**")
+        uploaded_file = st.file_uploader("Choose a file (PDF, DOC, DOCX, TXT, CSV)", type=["pdf", "doc", "docx", "txt", "csv", "xls", "xlsx"])
+
+        if uploaded_file is not None:
+            if len(st.session_state.kb_files) < 5:
+                file_size = f"{uploaded_file.size / (1024*1024):.1f} MB"
+                file_type = uploaded_file.name.split('.')[-1].upper()
+
+                if st.button("✅ Save to Knowledge Base", use_container_width=True):
+                    add_kb_file(uploaded_file.name, file_size, file_type, "Active")
+                    st.session_state.kb_files = load_kb_files()
+                    st.success(f"✅ File '{uploaded_file.name}' saved to Knowledge Base!")
+                    st.balloons()
+            else:
+                st.error("❌ Maximum 5 files allowed. Delete a file first.")
+
+        st.markdown("---")
+        st.markdown("**📚 Files in Knowledge Base**")
         if len(st.session_state.kb_files) > 0:
-            kb_data = {"Name": [f["name"] for f in st.session_state.kb_files], "Type": [f["type"] for f in st.session_state.kb_files], "Size": [f["size"] for f in st.session_state.kb_files]}
+            kb_data = {
+                "File Name": [f["name"] for f in st.session_state.kb_files],
+                "Type": [f["type"] for f in st.session_state.kb_files],
+                "Size": [f["size"] for f in st.session_state.kb_files],
+                "Date": [f["date"] for f in st.session_state.kb_files],
+                "Status": [f["status"] for f in st.session_state.kb_files]
+            }
             st.dataframe(pd.DataFrame(kb_data), use_container_width=True)
+
+            st.markdown("---")
+            st.markdown("**Delete File**")
+            file_to_delete = st.selectbox("Select file to delete", [f["name"] for f in st.session_state.kb_files], key="delete_file")
+            if st.button("🗑️ Delete Selected File", use_container_width=True):
+                st.session_state.kb_files = [f for f in st.session_state.kb_files if f["name"] != file_to_delete]
+                save_kb_files(st.session_state.kb_files)
+                st.success(f"✅ File '{file_to_delete}' deleted!")
+                st.rerun()
+        else:
+            st.info("📭 No files uploaded yet. Upload your first file above!")
     with tab2:
         st.markdown("#### Settings")
         st.text_input("API Key", type="password", placeholder="sk-...", label_visibility="collapsed")
