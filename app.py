@@ -528,21 +528,61 @@ def render_chat_widget():
         </script>
         """, unsafe_allow_html=True)
 
-        # Chat input (below floating widget, but styled to match)
-        col1, col2, col3 = st.columns([4, 1, 1])
+        # Chat input area
+        st.markdown("---")
+        st.markdown("### 💬 Your Message")
+
+        # Input field
+        user_input = st.text_input(
+            "",
+            key="float_input",
+            placeholder="Type here... (Press Enter or click Send)",
+            label_visibility="collapsed"
+        )
+
+        # Buttons
+        col1, col2 = st.columns(2)
         with col1:
-            user_input = st.text_input("Message", key="float_input", placeholder="💭 Ask your question...", label_visibility="collapsed")
+            send_clicked = st.button("📤 Send", key="float_send", use_container_width=True)
         with col2:
-            if st.button("Send", key="float_send"):
-                if user_input and user_input.strip():
-                    st.session_state.messages.append({"role": "user", "text": user_input})
-                    bot_response, source = get_ai_response(user_input)
-                    st.session_state.messages.append({"role": "bot", "text": bot_response, "source": source})
-                    st.rerun()
-        with col3:
-            if st.button("🔄", key="clear_chat_btn", help="Clear chat"):
-                st.session_state.messages = []
+            clear_clicked = st.button("🔄 Clear Chat", key="clear_chat_btn", use_container_width=True)
+
+        # Handle send
+        if send_clicked or user_input:
+            if user_input and user_input.strip():
+                # Add user message
+                st.session_state.messages.append({"role": "user", "text": user_input})
+
+                # Get AI response
+                bot_response, source = get_ai_response(user_input)
+
+                # Add bot message
+                st.session_state.messages.append({"role": "bot", "text": bot_response, "source": source})
+
+                # Rerun to clear input and show messages
                 st.rerun()
+
+        # Handle clear
+        if clear_clicked:
+            st.session_state.messages = []
+            st.rerun()
+
+        # JavaScript for Enter key support
+        st.markdown("""
+        <script>
+            const input = document.querySelector('input[placeholder*="Type here"]');
+            if (input) {
+                input.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        const buttons = Array.from(document.querySelectorAll('button'));
+                        const sendBtn = buttons.find(b => b.textContent.includes('Send'));
+                        if (sendBtn) sendBtn.click();
+                    }
+                });
+            }
+        </script>
+        """, unsafe_allow_html=True)
 
         # JavaScript to scroll messages
         st.markdown("""
