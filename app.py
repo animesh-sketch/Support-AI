@@ -290,6 +290,8 @@ if 'call_open' not in st.session_state:
     st.session_state.call_open = False
 if 'messages' not in st.session_state:
     st.session_state.messages = []
+if 'bot_typing' not in st.session_state:
+    st.session_state.bot_typing = False
 if 'kb_files' not in st.session_state:
     st.session_state.kb_files = load_kb_files()
 
@@ -393,8 +395,27 @@ def render_chat_widget():
                 word-wrap: break-word;
             }
 
-            .typing-indicator { display: flex; gap: 4px; align-self: flex-start; padding: 12px 16px; }
-            .typing-dot { width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite; }
+            .typing-indicator {
+                display: flex;
+                gap: 6px;
+                align-self: flex-start;
+                padding: 14px 16px;
+                background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%);
+                border-left: 4px solid #3b82f6;
+                border-radius: 14px;
+                width: fit-content;
+            }
+
+            .typing-dot {
+                width: 8px;
+                height: 8px;
+                background: #3b82f6;
+                border-radius: 50%;
+                animation: pulse 1.4s infinite;
+                animation-fill-mode: both;
+            }
+
+            .typing-dot:nth-child(1) { animation-delay: 0s; }
             .typing-dot:nth-child(2) { animation-delay: 0.2s; }
             .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
@@ -478,6 +499,10 @@ def render_chat_widget():
                 txt = msg["text"].replace('"', '&quot;')
                 msgs_html += f'<div class="message user-message">👤 {txt}</div>'
 
+        # Add typing indicator if bot is responding
+        if st.session_state.bot_typing:
+            msgs_html += '<div class="message"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>'
+
         # Chat input below widget for message capture
         st.markdown("")  # Add spacing
         col1, col2 = st.columns([5, 1])
@@ -487,9 +512,16 @@ def render_chat_widget():
             if st.button("Send", key="floating_send"):
                 if widget_input and widget_input.strip():
                     st.session_state.messages.append({"role": "user", "text": widget_input})
-                    response, source = get_ai_response(widget_input)
-                    st.session_state.messages.append({"role": "bot", "text": response, "source": source})
+                    st.session_state.bot_typing = True
                     st.rerun()
+
+        # Process bot response if typing was triggered
+        if st.session_state.bot_typing and len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "user":
+            last_user_msg = st.session_state.messages[-1]["text"]
+            response, source = get_ai_response(last_user_msg)
+            st.session_state.messages.append({"role": "bot", "text": response, "source": source})
+            st.session_state.bot_typing = False
+            st.rerun()
 
         st.markdown(f'<script>let m=document.getElementById("chat-messages");m.innerHTML="{msgs_html}";m.scrollTop=m.scrollHeight;</script>', unsafe_allow_html=True)
 
