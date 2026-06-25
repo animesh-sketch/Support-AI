@@ -381,7 +381,7 @@ elif st.session_state.page == 'analytics':
 
 elif st.session_state.page == 'admin':
     st.markdown("### ⚙️ Admin Panel")
-    tab1, tab2 = st.tabs(["📚 Knowledge Base", "🔧 Settings"])
+    tab1, tab2, tab3 = st.tabs(["📚 Knowledge Base", "🔧 Settings", "🎤 Voice Bot"])
     with tab1:
         st.markdown("#### Knowledge Base Management")
         st.metric("Files Stored", len(st.session_state.kb_files), "/ 5")
@@ -393,6 +393,31 @@ elif st.session_state.page == 'admin':
         st.text_input("API Key", type="password", placeholder="sk-...", label_visibility="collapsed")
         if st.button("💾 Save", use_container_width=True):
             st.success("✅ Saved!")
+    with tab3:
+        st.markdown("#### 🎤 Voice Bot Integration")
+        col1, col2 = st.columns(2)
+        with col1:
+            enable_voice = st.checkbox("Enable Voice Bot", value=True)
+            voice_name = st.text_input("Bot Name", value="Anamika Voice", placeholder="Enter voice bot name")
+        with col2:
+            voice_type = st.selectbox("Voice Type", ["Female - English", "Male - English", "Female - Hindi", "Male - Hindi"])
+            language = st.selectbox("Language", ["English", "Hindi", "Spanish"])
+
+        st.markdown("---")
+        st.markdown("**Greeting Message**")
+        greeting = st.text_area("Voice Bot Greeting", value="Hello! I'm Anamika Voice Assistant. How can I help you?", height=80, placeholder="Enter greeting message for voice bot")
+
+        st.markdown("---")
+        col1, col2 = st.columns(2)
+        with col1:
+            convin_api = st.text_input("Convin API Key", type="password", placeholder="Enter Convin API key", label_visibility="collapsed")
+        with col2:
+            convin_id = st.text_input("Workspace ID", placeholder="Enter Convin workspace ID", label_visibility="collapsed")
+
+        if st.button("💾 Save Voice Settings", use_container_width=True):
+            st.success("✅ Voice bot settings saved!")
+            st.toast("🎤 Voice bot is " + ("enabled" if enable_voice else "disabled"))
+
     if st.button("Home"):
         st.session_state.page = 'home'
         st.rerun()
