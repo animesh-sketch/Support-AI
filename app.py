@@ -59,6 +59,169 @@ def get_kb_files():
     return load_kb_files()
 
 # ============================================================================
+# KNOWLEDGE BASE CONTENT DATABASE
+# ============================================================================
+KB_CONTENT = {
+    "Password Reset Guide.pdf": {
+        "title": "Password Reset Guide",
+        "keywords": ["password", "reset", "forgot", "login", "account", "access"],
+        "content": """To reset your password:
+1. Click "Forgot Password" on the login page
+2. Enter your email address
+3. Check your email for reset link (within 2 minutes)
+4. Click the link to create a new password
+5. Use new password to login
+
+If you don't receive the email:
+- Check spam folder
+- Wait 2-3 minutes for delivery
+- Try requesting another reset link"""
+    },
+    "Billing FAQ.docx": {
+        "title": "Billing FAQ",
+        "keywords": ["billing", "payment", "invoice", "subscription", "charge", "plan", "pricing", "cost", "refund"],
+        "content": """Common Billing Questions:
+
+Q: What payment methods do you accept?
+A: We accept all major credit cards (Visa, Mastercard, AmEx), PayPal, and bank transfers.
+
+Q: When am I charged?
+A: You're charged on the same date each month (billing date).
+
+Q: Can I change my plan?
+A: Yes! You can upgrade/downgrade anytime. Changes take effect next billing cycle.
+
+Q: What's your refund policy?
+A: 30-day money-back guarantee on annual plans. Monthly plans have 7-day refund period.
+
+Q: How do I cancel my subscription?
+A: Go to Settings > Billing > Cancel Subscription. You'll have access until end of current period."""
+    },
+    "API Documentation.pdf": {
+        "title": "API Documentation",
+        "keywords": ["api", "developer", "integration", "endpoint", "code", "programming", "rest"],
+        "content": """Anamika API Documentation:
+
+Base URL: https://api.anamika.ai/v1
+
+Authentication:
+- Use API key in Authorization header
+- Format: Authorization: Bearer YOUR_API_KEY
+
+Main Endpoints:
+- POST /chat - Send message
+- GET /conversations - List conversations
+- POST /escalate - Escalate to human agent
+- GET /kb/search - Search knowledge base
+
+Rate Limits:
+- 100 requests/minute for standard plans
+- 1000 requests/minute for enterprise
+
+Error Codes:
+- 401: Unauthorized
+- 429: Too many requests
+- 500: Server error"""
+    },
+    "Troubleshooting Guide.txt": {
+        "title": "Troubleshooting Guide",
+        "keywords": ["troubleshoot", "error", "problem", "issue", "bug", "not working", "fix", "help"],
+        "content": """Common Issues & Solutions:
+
+Widget Not Loading:
+- Clear browser cache
+- Check JavaScript is enabled
+- Verify API key is correct
+
+Chat Not Responding:
+- Check internet connection
+- Refresh the page
+- Clear browser cookies
+
+API Errors:
+- Verify authentication token
+- Check rate limits not exceeded
+- Ensure correct endpoint URL
+
+Missing Messages:
+- Check conversation is saved
+- Refresh to load latest messages
+- Contact support if still missing
+
+Performance Issues:
+- Use modern browser (Chrome, Firefox, Safari)
+- Check system resources
+- Reduce number of concurrent conversations"""
+    }
+}
+
+def search_kb(user_query):
+    """Search Knowledge Base for relevant documents"""
+    user_query_lower = user_query.lower()
+    results = []
+
+    for doc_name, doc_data in KB_CONTENT.items():
+        match_score = 0
+
+        # Check keyword matches
+        for keyword in doc_data["keywords"]:
+            if keyword in user_query_lower:
+                match_score += 2
+
+        # Check title match
+        if doc_data["title"].lower() in user_query_lower:
+            match_score += 3
+
+        # Check content relevance
+        words = user_query_lower.split()
+        for word in words:
+            if len(word) > 3 and word in doc_data["content"].lower():
+                match_score += 1
+
+        if match_score > 0:
+            results.append({
+                "document": doc_name,
+                "title": doc_data["title"],
+                "content": doc_data["content"],
+                "score": match_score
+            })
+
+    # Sort by relevance score
+    results.sort(key=lambda x: x["score"], reverse=True)
+    return results
+
+def get_support_response(user_message):
+    """Get support agent response from KB or generate intelligent response"""
+    # Search KB for relevant documents
+    kb_results = search_kb(user_message)
+
+    if kb_results and kb_results[0]["score"] > 0:
+        # Found relevant KB document
+        top_result = kb_results[0]
+        response = f"""Based on our Knowledge Base ({top_result['title']}):
+
+{top_result['content']}
+
+---
+📚 Source: {top_result['title']}"""
+        return response, top_result["title"]
+    else:
+        # No KB match - provide intelligent response
+        user_lower = user_message.lower()
+
+        if any(word in user_lower for word in ["hello", "hi", "hey", "greet"]):
+            return "👋 Hello! Welcome to Anamika Support. How can I assist you today? I'm here to help with questions about passwords, billing, API integration, troubleshooting, and more!", "General Support"
+
+        elif any(word in user_lower for word in ["help", "support", "assist", "issue"]):
+            return "I'm here to help! You can ask me about:\n• Password reset\n• Billing & payments\n• API documentation\n• Troubleshooting\n\nWhat would you like help with?", "Help Center"
+
+        elif any(word in user_lower for word in ["agent", "human", "person", "talk to", "speak"]):
+            return "👤 Sure! I can connect you with a human support agent. They'll be available shortly to help with your specific needs.", "Agent Escalation"
+
+        else:
+            return "I understand you're asking about that topic. While I don't have specific documentation available, let me connect you with a human support agent who can provide personalized assistance. Would you like me to escalate your question?", "General Support"
+
+# ============================================================================
 # DESIGN SYSTEM
 # ============================================================================
 st.markdown("""
@@ -314,7 +477,11 @@ if 'page' not in st.session_state:
     st.session_state.page = 'dashboard'
 if 'widget_chat' not in st.session_state:
     st.session_state.widget_chat = [
-        {"role": "bot", "text": "Hi! 👋 How can I help you today?"}
+        {
+            "role": "bot",
+            "text": "👋 Hello! I'm Anamika, your AI support agent. I can help you with:\n• Password reset\n• Billing & subscriptions\n• API integration\n• Troubleshooting issues\n\nWhat can I help you with today?",
+            "source": "Welcome"
+        }
     ]
 if 'widget_input' not in st.session_state:
     st.session_state.widget_input = ""
@@ -449,23 +616,55 @@ def dashboard():
 def chat_page():
     st.markdown("### 💬 Chat Support")
 
+    st.markdown("""
+    <div class="premium-card">
+        <p style="margin: 0;">🤖 <strong>Anamika Support Agent</strong> • Powered by Knowledge Base • Response Time: <strong>Instant</strong></p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
     # Display chat
     for msg in st.session_state.widget_chat:
         if msg["role"] == "bot":
-            st.info(f"🤖 **Anamika:** {msg['text']}")
+            source = msg.get("source", "Support")
+            st.markdown(f"""
+            <div class="premium-card" style="background: rgba(34, 197, 94, 0.1); border-left: 3px solid #22c55e;">
+                <p style="margin: 0;"><strong>🤖 Anamika:</strong></p>
+                <p style="margin: 8px 0 0 0; white-space: pre-wrap;">{msg['text']}</p>
+                <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 11px;">📚 Source: {source}</p>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.success(f"👤 **You:** {msg['text']}")
+            st.markdown(f"""
+            <div class="premium-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%); border-left: 3px solid #3b82f6;">
+                <p style="margin: 0;"><strong>👤 You:</strong></p>
+                <p style="margin: 8px 0 0 0;">{msg['text']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
 
     # Input
     col1, col2 = st.columns([5, 1])
     with col1:
-        user_msg = st.text_input("Message...", label_visibility="collapsed", placeholder="Type your question")
+        user_msg = st.text_input("Ask a question...", label_visibility="collapsed", placeholder="Type your question about passwords, billing, API, troubleshooting, etc.")
     with col2:
         send = st.button("Send", use_container_width=True)
 
     if send and user_msg:
+        # Add user message
         st.session_state.widget_chat.append({"role": "user", "text": user_msg})
-        st.session_state.widget_chat.append({"role": "bot", "text": "Thanks! I'm here to help. What else can I do?"})
+
+        # Get support response from KB
+        bot_response, source = get_support_response(user_msg)
+
+        # Add bot response
+        st.session_state.widget_chat.append({
+            "role": "bot",
+            "text": bot_response,
+            "source": source
+        })
         st.rerun()
 
     st.markdown("---")
@@ -742,9 +941,13 @@ elif st.session_state.page == 'admin':
 messages_html = ""
 for msg in st.session_state.widget_chat:
     if msg["role"] == "bot":
-        messages_html += f'<div class="msg-bot">{msg["text"]}</div>'
+        source = msg.get("source", "Support")
+        # Escape special characters and preserve newlines
+        text = msg["text"].replace('\n', '<br>').replace('"', '\\"')
+        messages_html += f'<div class="msg-bot"><strong style="color: #22c55e;">🤖 Anamika</strong><br><span style="margin-top: 4px; display: block;">{text}</span><div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(59, 130, 246, 0.2); font-size: 10px; color: #94a3b8;">📚 {source}</div></div>'
     else:
-        messages_html += f'<div class="msg-user">{msg["text"]}</div>'
+        text = msg["text"].replace('\n', '<br>').replace('"', '\\"')
+        messages_html += f'<div class="msg-user">{text}</div>'
 
 st.markdown(f"""
 <script>
