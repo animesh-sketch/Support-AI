@@ -299,12 +299,12 @@ if 'kb_files' not in st.session_state:
 # CHAT WIDGET COMPONENT
 # ============================================================================
 def render_chat_widget():
-    """Render world-class professional chat widget with smooth animations"""
+    """Render world-class professional chat widget - Fixed & Working"""
 
     # Chat & Call toggle buttons
     col1, col2, col3 = st.columns([19, 1, 1])
     with col2:
-        if st.button("💬", key="chat_toggle", help="Toggle Chat"):
+        if st.button("💬", key="chat_toggle", help="Open Chat"):
             st.session_state.chat_open = not st.session_state.chat_open
             st.rerun()
     with col3:
@@ -313,217 +313,69 @@ def render_chat_widget():
             st.session_state.chat_open = False
             st.rerun()
 
-    # World-class Chat widget display
+    # Chat panel - shown when chat is open
     if st.session_state.chat_open:
-        st.markdown("""
-        <style>
-            @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        st.markdown("---")
+        st.markdown("### 🎯 Anamika Chat")
 
-            .chat-widget {
-                position: fixed;
-                right: 20px;
-                bottom: 20px;
-                z-index: 9999;
-                width: 440px;
-                max-height: 680px;
-                background: #ffffff;
-                border: 2px solid #3b82f6;
-                border-radius: 20px;
-                box-shadow: 0 25px 60px rgba(59, 130, 246, 0.25);
-                backdrop-filter: blur(30px);
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
+        # Display all messages
+        messages_container = st.container()
+        with messages_container:
+            for msg in st.session_state.messages:
+                if msg["role"] == "user":
+                    st.markdown(f"""
+                    <div style="display: flex; justify-content: flex-end; margin: 10px 0;">
+                        <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 12px 16px; border-radius: 14px; max-width: 70%; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);">
+                            👤 {msg['text']}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    src = msg.get("source", "Support")
+                    st.markdown(f"""
+                    <div style="display: flex; justify-content: flex-start; margin: 10px 0;">
+                        <div style="background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%); border-left: 4px solid #3b82f6; color: #1e293b; padding: 12px 16px; border-radius: 14px; max-width: 70%; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);">
+                            <strong>🤖 Anamika</strong><br>{msg['text']}<br><span style="font-size: 11px; color: #64748b; margin-top: 8px; display: block;">📚 Source: {src}</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-            .chat-header {
-                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                padding: 20px;
-                color: white;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .chat-header-title { font-size: 18px; font-weight: 700; margin: 0; }
-            .chat-header-status { font-size: 12px; opacity: 0.9; margin: 4px 0 0 0; }
-            .status-badge { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 6px; }
-
-            .chat-messages {
-                flex: 1;
-                overflow-y: auto;
-                padding: 20px;
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
-                background: #ffffff;
-                scroll-behavior: smooth;
-            }
-
-            .message { animation: fadeIn 0.3s ease-in; }
-
-            .bot-message {
-                background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%);
-                padding: 14px 16px;
-                border-radius: 14px;
-                border-left: 4px solid #3b82f6;
-                color: #1e293b;
-                align-self: flex-start;
-                max-width: 85%;
-                font-size: 14px;
-                line-height: 1.5;
-                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-            }
-
-            .bot-message strong { color: #3b82f6; font-weight: 600; }
-            .bot-message .source { font-size: 11px; color: #64748b; margin-top: 8px; display: block; font-weight: 600; }
-
-            .user-message {
-                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                padding: 14px 16px;
-                border-radius: 14px;
-                color: white;
-                align-self: flex-end;
-                max-width: 85%;
-                font-size: 14px;
-                line-height: 1.5;
-                box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
-                word-wrap: break-word;
-            }
-
-            .typing-indicator {
-                display: flex;
-                gap: 6px;
-                align-self: flex-start;
-                padding: 14px 16px;
-                background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%);
-                border-left: 4px solid #3b82f6;
-                border-radius: 14px;
-                width: fit-content;
-            }
-
-            .typing-dot {
-                width: 8px;
-                height: 8px;
-                background: #3b82f6;
-                border-radius: 50%;
-                animation: pulse 1.4s infinite;
-                animation-fill-mode: both;
-            }
-
-            .typing-dot:nth-child(1) { animation-delay: 0s; }
-            .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-            .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-            .chat-footer {
-                padding: 16px;
-                border-top: 2px solid #e2e8f0;
-                display: flex;
-                gap: 10px;
-                background: #ffffff;
-            }
-
-            .chat-input {
-                flex: 1;
-                padding: 12px 16px;
-                background: #f8f9fa;
-                border: 2px solid #e2e8f0;
-                border-radius: 10px;
-                color: #1e293b;
-                font-size: 14px;
-                transition: all 0.3s ease;
-                font-family: inherit;
-            }
-
-            .chat-input:focus {
-                outline: none;
-                border-color: #3b82f6;
-                background: #ffffff;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            }
-
-            .chat-send {
-                padding: 12px 20px;
-                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                border: none;
-                border-radius: 10px;
-                color: white;
-                cursor: pointer;
-                font-weight: 600;
-                transition: all 0.3s ease;
-                font-size: 16px;
-            }
-
-            .chat-send:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-            .chat-send:active { transform: scale(0.98); }
-
-            .chat-info {
-                font-size: 12px;
-                color: #94a3b8;
-                text-align: center;
-                margin-top: 8px;
-                font-style: italic;
-            }
-        </style>
-
-        <div class="chat-widget">
-            <div class="chat-header">
-                <div>
-                    <h3 class="chat-header-title">🎯 Anamika</h3>
-                    <p class="chat-header-status"><span class="status-badge"></span>Always here to help</p>
-                </div>
-            </div>
-
-            <div class="chat-messages" id="chat-messages"></div>
-
-            <div class="chat-footer">
-                <input type="text" id="chat-input" class="chat-input" placeholder="Ask your question..." />
-                <button class="chat-send" onclick="sendChatMsg()">📤</button>
-            </div>
-            <div class="chat-info">💡 Powered by AI - Instant Support</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Build messages HTML with professional styling
-        msgs_html = ""
-        for msg in st.session_state.messages:
-            if msg["role"] == "bot":
-                txt = msg["text"].replace('"', '&quot;').replace('\n', '<br>')
-                src = msg.get("source", "Support")
-                msgs_html += f'<div class="message bot-message"><strong>🤖 Anamika</strong><br>{txt}<span class="source">📚 Source: {src}</span></div>'
-            else:
-                txt = msg["text"].replace('"', '&quot;')
-                msgs_html += f'<div class="message user-message">👤 {txt}</div>'
-
-        # Add typing indicator if bot is responding
+        # Typing indicator
         if st.session_state.bot_typing:
-            msgs_html += '<div class="message"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>'
+            st.markdown("""
+            <div style="display: flex; gap: 6px; margin: 10px 0;">
+                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite;"></div>
+                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite 0.2s;"></div>
+                <div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; animation: pulse 1.4s infinite 0.4s;"></div>
+            </div>
+            <style>
+                @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+            </style>
+            """, unsafe_allow_html=True)
 
-        # Chat input below widget for message capture
-        st.markdown("")  # Add spacing
+        # Chat input
+        st.markdown("---")
         col1, col2 = st.columns([5, 1])
         with col1:
-            widget_input = st.text_input("💬 Ask Anamika", placeholder="Type your question...", key="floating_chat_input", label_visibility="collapsed")
+            chat_input = st.text_input("💬 Your message", placeholder="Ask Anamika...", key="chat_msg_input", label_visibility="collapsed")
         with col2:
-            if st.button("Send", key="floating_send"):
-                if widget_input and widget_input.strip():
-                    st.session_state.messages.append({"role": "user", "text": widget_input})
-                    st.session_state.bot_typing = True
-                    st.rerun()
+            send_btn = st.button("Send 📤", key="send_chat_btn", use_container_width=True)
 
-        # Process bot response if typing was triggered
+        # Process message
+        if send_btn and chat_input and chat_input.strip():
+            st.session_state.messages.append({"role": "user", "text": chat_input})
+            st.session_state.bot_typing = True
+            st.rerun()
+
+        # Generate bot response
         if st.session_state.bot_typing and len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "user":
-            last_user_msg = st.session_state.messages[-1]["text"]
-            response, source = get_ai_response(last_user_msg)
+            import time
+            time.sleep(0.5)  # Brief delay for better UX
+            last_msg = st.session_state.messages[-1]["text"]
+            response, source = get_ai_response(last_msg)
             st.session_state.messages.append({"role": "bot", "text": response, "source": source})
             st.session_state.bot_typing = False
             st.rerun()
-
-        st.markdown(f'<script>let m=document.getElementById("chat-messages");m.innerHTML="{msgs_html}";m.scrollTop=m.scrollHeight;</script>', unsafe_allow_html=True)
 
     # Call widget display - using Streamlit form for better handling
     if st.session_state.call_open:
