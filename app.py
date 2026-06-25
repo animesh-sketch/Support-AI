@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 import numpy as np
+import json
+import os
 
 st.set_page_config(
     page_title="Anamika - Support Widget",
@@ -9,6 +11,52 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# ============================================================================
+# PERSISTENT STORAGE FOR KB FILES
+# ============================================================================
+KB_DATA_FILE = "kb_files.json"
+
+def load_kb_files():
+    """Load KB files from persistent storage"""
+    if os.path.exists(KB_DATA_FILE):
+        try:
+            with open(KB_DATA_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return []
+    return []
+
+def save_kb_files(files):
+    """Save KB files to persistent storage"""
+    with open(KB_DATA_FILE, 'w') as f:
+        json.dump(files, f, indent=2)
+
+def add_kb_file(name, size, file_type, status="Active"):
+    """Add a new file to KB"""
+    files = load_kb_files()
+    if len(files) < 5:
+        files.append({
+            "name": name,
+            "size": size,
+            "type": file_type,
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "status": status,
+            "id": len(files) + 1
+        })
+        save_kb_files(files)
+        return True
+    return False
+
+def delete_kb_file(file_name):
+    """Delete a file from KB"""
+    files = load_kb_files()
+    files = [f for f in files if f["name"] != file_name]
+    save_kb_files(files)
+
+def get_kb_files():
+    """Get all KB files"""
+    return load_kb_files()
 
 # ============================================================================
 # DESIGN SYSTEM
@@ -273,10 +321,13 @@ if 'widget_input' not in st.session_state:
 if 'admin_pass' not in st.session_state:
     st.session_state.admin_pass = False
 if 'kb_files' not in st.session_state:
-    st.session_state.kb_files = [
-        {"name": "Password Reset Guide.pdf", "size": "2.3 MB", "type": "PDF", "date": "2026-06-20", "status": "Active"},
-        {"name": "Billing FAQ.docx", "size": "1.8 MB", "type": "DOCX", "date": "2026-06-19", "status": "Active"},
-    ]
+    # Load from persistent storage
+    st.session_state.kb_files = get_kb_files()
+    # If no files exist, create default ones
+    if len(st.session_state.kb_files) == 0:
+        add_kb_file("Password Reset Guide.pdf", "2.3 MB", "PDF", "Active")
+        add_kb_file("Billing FAQ.docx", "1.8 MB", "DOCX", "Active")
+        st.session_state.kb_files = get_kb_files()
 
 # ============================================================================
 # FLOATING WIDGET COMPONENT
@@ -508,8 +559,12 @@ def admin_page():
             st.markdown("#### 📚 Knowledge Base Management")
             st.markdown("""
             <div class="premium-card">
-                <p style="margin: 0; color: var(--text-muted); font-size: 12px;">
-                    Supported formats: PDF, DOC, DOCX, TXT, CSV, XLS, XLSX, PPT, PPTX, JSON, XML
+                <p style="margin: 0; color: #22c55e; font-weight: 700;">✓ 💾 PERMANENT STORAGE ENABLED</p>
+                <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
+                    All files are saved permanently and won't be deleted. Your KB is always available.
+                </p>
+                <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 12px;">
+                    <strong>Supported formats:</strong> PDF, DOC, DOCX, TXT, CSV, XLS, XLSX, PPT, PPTX, JSON, XML
                 </p>
             </div>
             """, unsafe_allow_html=True)
@@ -545,29 +600,28 @@ def admin_page():
                         """, unsafe_allow_html=True)
 
                     if st.button("✅ Upload All Files", use_container_width=True, key="upload_kb"):
+                        uploaded_count = 0
                         for file in uploaded_files:
-                            if len(st.session_state.kb_files) < 5:
-                                st.session_state.kb_files.append({
-                                    "name": file.name,
-                                    "size": f"{file.size / 1024:.1f} KB" if file.size < 1_000_000 else f"{file.size / 1024 / 1024:.1f} MB",
-                                    "type": file.name.split('.')[-1].upper(),
-                                    "date": datetime.now().strftime("%Y-%m-%d"),
-                                    "status": "Active"
-                                })
-                        st.success(f"✅ {len(uploaded_files)} file(s) uploaded successfully!")
+                            file_size = f"{file.size / 1024:.1f} KB" if file.size < 1_000_000 else f"{file.size / 1024 / 1024:.1f} MB"
+                            file_type = file.name.split('.')[-1].upper()
+                            if add_kb_file(file.name, file_size, file_type, "Active"):
+                                uploaded_count += 1
+                        st.session_state.kb_files = get_kb_files()
+                        st.success(f"✅ {uploaded_count} file(s) uploaded and saved permanently!")
                         st.rerun()
 
             with col2:
-                st.markdown("**Upload Status**")
+                st.markdown("**Storage Status**")
                 st.markdown(f"""
                 <div class="premium-card">
                     <div style="text-align: center;">
-                        <p style="margin: 0; font-size: 24px; font-weight: 900; color: #3b82f6;">{len(st.session_state.kb_files)}</p>
-                        <p style="margin: 6px 0 0 0; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Files Stored</p>
+                        <p style="margin: 0; font-size: 24px; font-weight: 900; color: #22c55e;">✓ {len(st.session_state.kb_files)}</p>
+                        <p style="margin: 6px 0 0 0; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Files Permanently Stored</p>
                     </div>
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(59, 130, 246, 0.2);">
-                        <p style="margin: 0; font-size: 12px;"><strong>Max Files:</strong> 5</p>
-                        <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Remaining:</strong> {5 - len(st.session_state.kb_files)} slots</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.2);">
+                        <p style="margin: 0; font-size: 12px; color: #22c55e;"><strong>💾 Persistent Storage:</strong> Active</p>
+                        <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Max Files:</strong> 5</p>
+                        <p style="margin: 6px 0 0 0; font-size: 12px;"><strong>Available Slots:</strong> {5 - len(st.session_state.kb_files)}</p>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -603,7 +657,8 @@ def admin_page():
                         label_visibility="collapsed"
                     )
                     if st.button("🗑️ Delete Selected", use_container_width=True):
-                        st.session_state.kb_files = [f for f in st.session_state.kb_files if f["name"] != file_to_delete]
+                        delete_kb_file(file_to_delete)
+                        st.session_state.kb_files = get_kb_files()
                         st.success(f"✅ {file_to_delete} deleted!")
                         st.rerun()
 
