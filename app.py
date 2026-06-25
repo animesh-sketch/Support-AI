@@ -299,7 +299,170 @@ if 'kb_files' not in st.session_state:
 # CHAT WIDGET COMPONENT
 # ============================================================================
 def render_chat_widget():
-    """Render chat widget - Simple & Working"""
+    """Render premium chat widget with professional design"""
+
+    # Premium CSS styling
+    st.markdown("""
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .premium-chat-container {
+            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 20px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.15);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .chat-header-premium {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-text h3 { margin: 0; font-size: 20px; font-weight: 700; }
+        .chat-header-text p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.9; }
+        .status-dot { display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; margin-right: 8px; }
+
+        .messages-area {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 16px 0;
+            margin-bottom: 20px;
+        }
+
+        .message-bubble {
+            animation: fadeIn 0.4s ease-in;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            padding: 14px 16px;
+            border-radius: 16px;
+            max-width: 75%;
+            word-wrap: break-word;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .bot-content {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f9ff 100%);
+            color: #1e293b;
+            border-left: 4px solid #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .user-content {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .message-source {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            font-weight: 600;
+        }
+
+        .input-area-premium {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .input-area-premium:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-field-premium {
+            flex: 1;
+            padding: 12px 16px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field-premium:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-btn-premium {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .send-btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .send-btn-premium:active {
+            transform: translateY(0);
+        }
+
+        .chat-footer-info {
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+
+    <div class="premium-chat-container">
+        <div class="chat-header-premium">
+            <div class="chat-header-text">
+                <h3>🎯 Anamika</h3>
+                <p><span class="status-dot"></span>Always here to help</p>
+            </div>
+            <div style="font-size: 28px;">💬</div>
+        </div>
+    """, unsafe_allow_html=True)
 
     # Chat & Call toggle buttons
     col1, col2, col3 = st.columns([19, 1, 1])
@@ -315,23 +478,46 @@ def render_chat_widget():
 
     # Chat panel
     if st.session_state.chat_open:
-        st.markdown("---")
-        st.markdown("## 🎯 Chat with Anamika")
+        st.markdown("""<div class="messages-area">""", unsafe_allow_html=True)
 
-        # Display messages
+        # Display messages with premium styling
+        if len(st.session_state.messages) == 0:
+            st.markdown("""
+            <div style="text-align: center; color: #94a3b8; padding: 40px 20px;">
+                <p style="font-size: 32px; margin-bottom: 10px;">👋</p>
+                <p><strong>Start a conversation!</strong></p>
+                <p style="font-size: 13px;">Ask me anything about our services</p>
+            </div>
+            """, unsafe_allow_html=True)
+
         for msg in st.session_state.messages:
             if msg["role"] == "user":
-                st.markdown(f"**👤 You:** {msg['text']}")
+                st.markdown(f"""
+                <div class="message-bubble user-message">
+                    <div class="message-content user-content">
+                        👤 {msg['text']}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 src = msg.get("source", "Support")
-                st.markdown(f"**🤖 Anamika:** {msg['text']}\n\n📚 *Source: {src}*")
+                st.markdown(f"""
+                <div class="message-bubble bot-message">
+                    <div class="message-content bot-content">
+                        <strong>🤖 Anamika</strong><br>{msg['text']}
+                        <div class="message-source">📚 Source: {src}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
-        # Chat input and send
+        st.markdown("""</div>""", unsafe_allow_html=True)
+
+        # Premium Chat input
         col1, col2 = st.columns([5, 1])
         with col1:
-            user_input = st.text_input("Ask your question:", key="user_input_chat", placeholder="Type here...")
+            user_input = st.text_input("", key="user_input_chat", placeholder="💭 Type your question here...", label_visibility="collapsed")
         with col2:
-            if st.button("Send", key="send_btn_chat"):
+            if st.button("📤 Send", key="send_btn_chat", use_container_width=True):
                 if user_input and user_input.strip():
                     # Add user message
                     st.session_state.messages.append({"role": "user", "text": user_input})
@@ -345,7 +531,14 @@ def render_chat_widget():
                     # Rerun to clear input and show messages
                     st.rerun()
 
-    # Call widget display - using Streamlit form for better handling
+        st.markdown("""
+            <div class="chat-footer-info">
+                ✨ Powered by AI - Instant Support | 🔒 Your messages are private
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Call widget display
     if st.session_state.call_open:
         st.markdown('<div style="position:fixed;right:20px;bottom:20px;z-index:9999;width:380px;background:#ffffff;border:2px solid #3b82f6;border-radius:20px;box-shadow:0 25px 60px rgba(59,130,246,0.2);backdrop-filter:blur(30px);overflow:hidden;"><div style="background:#3b82f6;padding:20px;color:white;"><h3 style="margin:0;font-size:18px;font-weight:700;">☎️ Schedule a Call</h3><p style="margin:4px 0 0 0;font-size:12px;">We\'ll call within 2 minutes</p></div></div>', unsafe_allow_html=True)
 
