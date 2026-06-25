@@ -485,8 +485,6 @@ if 'widget_chat' not in st.session_state:
     ]
 if 'widget_input' not in st.session_state:
     st.session_state.widget_input = ""
-if 'admin_pass' not in st.session_state:
-    st.session_state.admin_pass = False
 if 'kb_files' not in st.session_state:
     # Load from persistent storage
     st.session_state.kb_files = get_kb_files()
@@ -737,20 +735,7 @@ def analytics_page():
 # ADMIN PAGE
 # ============================================================================
 def admin_page():
-    if not st.session_state.admin_pass:
-        st.markdown("### 🔐 Admin Login")
-        pwd = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
-        if st.button("Login", use_container_width=True):
-            if pwd == "admin@anamika":
-                st.session_state.admin_pass = True
-                st.rerun()
-            else:
-                st.error("❌ Invalid password")
-        if st.button("Back", use_container_width=True):
-            st.session_state.page = 'dashboard'
-            st.rerun()
-    else:
-        st.markdown("### ⚙️ Admin Panel")
+    st.markdown("### ⚙️ Admin Panel")
 
         tab1, tab2, tab3, tab4 = st.tabs(["📚 Knowledge Base", "🎤 Voice Config", "🤖 Bot Settings", "⚡ Advanced"])
 
@@ -914,8 +899,8 @@ def admin_page():
                 st.success("✅ Advanced settings saved!")
 
         st.markdown("---")
-        if st.button("Logout", use_container_width=True):
-            st.session_state.admin_pass = False
+        if st.button("Back to Home", use_container_width=True):
+            st.session_state.page = 'dashboard'
             st.rerun()
 
 # ============================================================================
