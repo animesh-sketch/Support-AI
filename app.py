@@ -181,6 +181,97 @@ st.markdown("""
         border-top: 1px solid rgba(148, 163, 184, 0.2);
         margin: 24px 0;
     }
+
+    /* Floating Widget */
+    .floating-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .widget-button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border: none;
+        color: white;
+        font-size: 28px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .widget-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(59, 130, 246, 0.7);
+    }
+
+    .widget-menu {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 12px;
+        padding: 12px;
+        min-width: 180px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .widget-option {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        margin: 6px 0;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .widget-option:hover {
+        transform: translateX(-4px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .widget-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 4px;
+    }
+
+    .widget-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ef4444;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -189,6 +280,9 @@ st.markdown("""
 # ============================================================================
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'dashboard'
+
+if 'widget_open' not in st.session_state:
+    st.session_state.widget_open = False
 
 if 'kb_articles' not in st.session_state:
     st.session_state.kb_articles = [
@@ -202,6 +296,51 @@ if 'chat_history' not in st.session_state:
         {'role': 'customer', 'message': 'What are your pricing plans?', 'time': '10:30 AM'},
         {'role': 'agent', 'message': 'We offer three plans: Starter ($99), Pro ($299), Enterprise (custom). KB-sourced answer.', 'time': '10:31 AM'},
     ]
+
+# ============================================================================
+# FLOATING WIDGET
+# ============================================================================
+def render_floating_widget():
+    col1, col2 = st.columns([1, 0.2])
+
+    with col2:
+        if st.session_state.widget_open:
+            st.markdown("""
+            <div class="floating-widget">
+                <div class="widget-menu">
+                    <button class="widget-close" onclick="window.location.reload();">✕</button>
+                    <h4 style="margin: 8px 0; color: #f1f5f9; font-size: 14px;">How can we help?</h4>
+            """, unsafe_allow_html=True)
+
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button("💬 Chat", key="widget_chat", use_container_width=True):
+                    st.session_state.current_page = 'chat'
+                    st.session_state.widget_open = False
+                    st.rerun()
+
+            with col_b:
+                if st.button("☎️ Call", key="widget_call", use_container_width=True):
+                    st.info("📞 Initiating call...")
+                    st.session_state.widget_open = False
+
+            st.markdown("""
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="floating-widget">
+                <button class="widget-button" onclick="document.querySelector('[data-testid=stButton]').click();" title="Open Support">
+                    💬
+                    <span class="widget-badge">2</span>
+                </button>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("Open Widget", key="open_widget", label_visibility="collapsed"):
+                st.session_state.widget_open = True
+                st.rerun()
 
 # ============================================================================
 # HEADER
@@ -597,6 +736,11 @@ def render_settings():
             'Chats': [0, 5, 12],
         })
         st.dataframe(team, use_container_width=True, hide_index=True)
+
+# ============================================================================
+# RENDER FLOATING WIDGET
+# ============================================================================
+render_floating_widget()
 
 # ============================================================================
 # NAVIGATION
