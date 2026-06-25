@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import numpy as np
 
@@ -12,7 +11,7 @@ st.set_page_config(
 )
 
 # ============================================================================
-# ANAMIKA DESIGN SYSTEM - FLOATING CHAT WIDGET
+# DESIGN SYSTEM
 # ============================================================================
 st.markdown("""
 <style>
@@ -34,8 +33,6 @@ st.markdown("""
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         color: var(--text);
     }
-
-    .main { background: transparent; }
 
     h1 {
         font-size: 48px !important;
@@ -72,19 +69,12 @@ st.markdown("""
         box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6) !important;
     }
 
-    /* ============================================================================
-    FLOATING CHAT WIDGET
-    ============================================================================ */
-
-    .anamika-widget-floating {
+    /* WIDGET STYLES */
+    .widget-button-float {
         position: fixed !important;
         top: 30px !important;
         right: 30px !important;
         z-index: 999999 !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-
-    .anamika-button-main {
         width: 70px !important;
         height: 70px !important;
         border-radius: 50% !important;
@@ -94,19 +84,20 @@ st.markdown("""
         font-size: 32px !important;
         cursor: pointer !important;
         box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35) !important;
-        transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        position: relative !important;
+        transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    .anamika-button-main:hover {
+    .widget-button-float:hover {
         transform: scale(1.18) !important;
         box-shadow: 0 18px 48px rgba(59, 130, 246, 0.45) !important;
     }
 
-    .anamika-badge {
+    .widget-badge {
         position: absolute !important;
         top: -6px !important;
         right: -6px !important;
@@ -122,164 +113,120 @@ st.markdown("""
         font-weight: 800 !important;
         box-shadow: 0 3px 12px rgba(239, 68, 68, 0.6) !important;
         border: 2px solid rgba(15, 23, 42, 0.8) !important;
+        animation: badge-pulse 2s ease-in-out infinite !important;
     }
 
-    .anamika-chatbox {
+    @keyframes badge-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.12); }
+    }
+
+    .widget-chat {
         position: fixed !important;
         top: 110px !important;
         right: 20px !important;
         width: 380px !important;
-        height: 600px !important;
+        max-height: 550px !important;
         background: rgba(15, 23, 42, 0.98) !important;
         border: 1px solid rgba(59, 130, 246, 0.3) !important;
         border-radius: 20px !important;
         box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
         backdrop-filter: blur(30px) !important;
+        z-index: 999998 !important;
         display: flex !important;
         flex-direction: column !important;
-        z-index: 999998 !important;
-        opacity: 0 !important;
-        transform: translateY(-20px) scale(0.95) !important;
-        transition: all 0.35s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        pointer-events: none !important;
+        overflow: hidden !important;
     }
 
-    .anamika-chatbox.open {
-        opacity: 1 !important;
-        transform: translateY(0) scale(1) !important;
-        pointer-events: auto !important;
-    }
-
-    .anamika-header {
+    .widget-header {
         background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
-        padding: 20px !important;
+        padding: 16px !important;
         border-radius: 20px 20px 0 0 !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
     }
 
-    .anamika-header h3 {
+    .widget-header h3 {
         margin: 0 !important;
         color: white !important;
         font-size: 16px !important;
         font-weight: 700 !important;
     }
 
-    .anamika-header p {
-        color: rgba(255, 255, 255, 0.8) !important;
-        font-size: 12px !important;
-        margin: 4px 0 0 0 !important;
-    }
-
-    .anamika-close {
-        background: rgba(255, 255, 255, 0.2) !important;
-        border: none !important;
-        color: white !important;
-        width: 32px !important;
-        height: 32px !important;
-        border-radius: 50% !important;
-        cursor: pointer !important;
-        font-size: 18px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .anamika-close:hover {
-        background: rgba(255, 255, 255, 0.3) !important;
-        transform: scale(1.1) !important;
-    }
-
-    .anamika-messages {
+    .widget-messages {
         flex: 1 !important;
         overflow-y: auto !important;
-        padding: 20px !important;
+        padding: 16px !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 12px !important;
+        gap: 10px !important;
     }
 
-    .message-bot {
+    .msg-bot {
         background: rgba(59, 130, 246, 0.2) !important;
-        padding: 12px 14px !important;
+        padding: 10px 12px !important;
         border-radius: 12px !important;
         border-left: 3px solid #3b82f6 !important;
         max-width: 85% !important;
         align-self: flex-start !important;
         font-size: 13px !important;
         color: var(--text) !important;
+        animation: slideIn 0.3s ease !important;
     }
 
-    .message-user {
+    .msg-user {
         background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
-        padding: 12px 14px !important;
+        padding: 10px 12px !important;
         border-radius: 12px !important;
         max-width: 85% !important;
         align-self: flex-end !important;
         font-size: 13px !important;
         color: white !important;
+        animation: slideIn 0.3s ease !important;
     }
 
-    .anamika-input-area {
-        padding: 16px !important;
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .widget-input-area {
+        padding: 12px !important;
         border-top: 1px solid rgba(59, 130, 246, 0.2) !important;
-        display: flex !important;
-        gap: 10px !important;
-        flex-wrap: wrap !important;
     }
 
-    .anamika-input {
-        flex: 1 !important;
+    .widget-input {
+        width: 100% !important;
+        padding: 10px 12px !important;
         background: rgba(30, 41, 59, 0.8) !important;
         border: 1px solid rgba(59, 130, 246, 0.3) !important;
         border-radius: 10px !important;
-        padding: 10px 12px !important;
         color: var(--text) !important;
         font-size: 13px !important;
         font-family: 'Inter', sans-serif !important;
-        min-height: 0 !important;
+        box-sizing: border-box !important;
+        transition: all 0.3s ease !important;
     }
 
-    .anamika-input:focus {
+    .widget-input:focus {
         border-color: #3b82f6 !important;
         outline: none !important;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
     }
 
-    .anamika-button-send {
-        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
-        border: none !important;
-        color: white !important;
-        width: 40px !important;
-        height: 40px !important;
-        border-radius: 10px !important;
-        cursor: pointer !important;
+    .widget-buttons {
         display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 16px !important;
-        transition: all 0.3s ease !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
     }
 
-    .anamika-button-send:hover {
-        transform: scale(1.1) !important;
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
-    }
-
-    .anamika-actions {
-        display: flex !important;
-        gap: 10px !important;
-        width: 100% !important;
-    }
-
-    .anamika-action-btn {
+    .widget-btn {
         flex: 1 !important;
+        padding: 8px !important;
         background: rgba(59, 130, 246, 0.15) !important;
         border: 1px solid rgba(59, 130, 246, 0.3) !important;
         color: #3b82f6 !important;
-        padding: 8px 12px !important;
         border-radius: 8px !important;
         cursor: pointer !important;
         font-size: 12px !important;
@@ -288,7 +235,7 @@ st.markdown("""
         font-family: 'Inter', sans-serif !important;
     }
 
-    .anamika-action-btn:hover {
+    .widget-btn:hover {
         background: rgba(59, 130, 246, 0.25) !important;
         border-color: rgba(59, 130, 246, 0.5) !important;
     }
@@ -317,56 +264,41 @@ st.markdown("""
 # ============================================================================
 if 'page' not in st.session_state:
     st.session_state.page = 'dashboard'
-if 'widget_open' not in st.session_state:
-    st.session_state.widget_open = False
-if 'messages' not in st.session_state:
-    st.session_state.messages = [
-        {"role": "bot", "content": "Hi! 👋 I'm Anamika. How can I help you today?"}
+if 'widget_chat' not in st.session_state:
+    st.session_state.widget_chat = [
+        {"role": "bot", "text": "Hi! 👋 How can I help you today?"}
     ]
-if 'admin_password' not in st.session_state:
-    st.session_state.admin_password = False
+if 'widget_input' not in st.session_state:
+    st.session_state.widget_input = ""
+if 'admin_pass' not in st.session_state:
+    st.session_state.admin_pass = False
 
 # ============================================================================
-# FLOATING WIDGET - RENDERED IN MAIN LAYOUT
+# FLOATING WIDGET COMPONENT
 # ============================================================================
-def render_floating_widget():
+def render_widget():
     """Render the floating chat widget"""
 
-    # Determine if widget is open
-    widget_open = st.session_state.widget_open
-
-    # HTML for floating button and chat
-    widget_html = f"""
-    <div class="anamika-widget-floating">
-        <button class="anamika-button-main" id="anamika-open-btn" onclick="document.getElementById('anamika-widget-toggle').click()">
-            🎯
-            <div class="anamika-badge">3</div>
-        </button>
-
-        <div class="anamika-chatbox {'open' if widget_open else ''}">
-            <div class="anamika-header">
-                <div>
-                    <h3>🎯 Anamika</h3>
-                    <p>Always here to help</p>
-                </div>
-                <button class="anamika-close" onclick="document.getElementById('anamika-close-btn').click()">✕</button>
+    # Widget HTML structure
+    widget_html = """
+    <div class="widget-button-float" id="widget-btn">
+        🎯
+        <div class="widget-badge">3</div>
+    </div>
+    <div class="widget-chat" id="widget-chat" style="display: none;">
+        <div class="widget-header">
+            <div>
+                <h3>🎯 Anamika</h3>
+                <p style="margin: 4px 0 0 0; color: rgba(255,255,255,0.8); font-size: 12px;">Always here to help</p>
             </div>
-
-            <div class="anamika-messages" id="anamika-messages">
-                <!-- Messages will be rendered here -->
-            </div>
-
-            <div class="anamika-input-area">
-                <div style="width: 100%;">
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <button class="anamika-action-btn" onclick="document.getElementById('call-btn').click()">☎️ Call</button>
-                        <button class="anamika-action-btn" onclick="alert('Chat with agent')">👤 Agent</button>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" class="anamika-input" id="anamika-input" placeholder="Type a message..." />
-                        <button class="anamika-button-send" onclick="document.getElementById('send-btn').click()">📤</button>
-                    </div>
-                </div>
+            <button style="background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px;" id="close-btn">✕</button>
+        </div>
+        <div class="widget-messages" id="messages"></div>
+        <div class="widget-input-area">
+            <input type="text" class="widget-input" id="msg-input" placeholder="Type message..." />
+            <div class="widget-buttons">
+                <button class="widget-btn" id="call-btn">☎️ Call</button>
+                <button class="widget-btn" id="agent-btn">👤 Agent</button>
             </div>
         </div>
     </div>
@@ -374,20 +306,50 @@ def render_floating_widget():
 
     st.markdown(widget_html, unsafe_allow_html=True)
 
+    # JavaScript to handle widget interactions
+    st.markdown("""
+    <script>
+        setTimeout(() => {
+            const btn = document.getElementById('widget-btn');
+            const chat = document.getElementById('widget-chat');
+            const closeBtn = document.getElementById('close-btn');
+            const msgInput = document.getElementById('msg-input');
+            const callBtn = document.getElementById('call-btn');
+            const agentBtn = document.getElementById('agent-btn');
+
+            // Toggle widget
+            btn.addEventListener('click', () => {
+                chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
+                if (chat.style.display === 'flex') {
+                    msgInput.focus();
+                }
+            });
+
+            // Close widget
+            closeBtn.addEventListener('click', () => {
+                chat.style.display = 'none';
+            });
+
+            // Smooth scroll to bottom
+            function scrollToBottom() {
+                const messages = document.getElementById('messages');
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            setTimeout(scrollToBottom, 100);
+        }, 500);
+    </script>
+    """, unsafe_allow_html=True)
+
 # ============================================================================
-# DASHBOARD PAGE
+# DASHBOARD
 # ============================================================================
 def dashboard():
     st.markdown("""
-    <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-                 border-radius: 24px; margin-bottom: 40px;">
+    <div style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); border-radius: 24px; margin-bottom: 40px;">
         <h1>🎯 Anamika</h1>
-        <p style="color: var(--text-muted); font-size: 16px; margin-top: 12px;">
-            Enterprise Floating Chat Widget
-        </p>
-        <p style="color: #22c55e; font-size: 13px; margin-top: 16px; font-weight: 700;">
-            👉 Click the 🎯 button in TOP RIGHT to start chatting!
-        </p>
+        <p style="color: var(--text-muted); font-size: 16px; margin-top: 12px;">Enterprise Floating Chat Widget</p>
+        <p style="color: #22c55e; font-size: 13px; margin-top: 16px; font-weight: 700;">👉 Click the 🎯 button in TOP RIGHT to chat!</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -406,76 +368,55 @@ def dashboard():
             st.rerun()
     with col4:
         if st.button("🔐 Admin", use_container_width=True):
-            st.session_state.page = 'admin_login'
+            st.session_state.page = 'admin'
             st.rerun()
 
     st.markdown("---")
 
     col1, col2, col3, col4, col5, col6 = st.columns(6)
-    metrics = [
-        (col1, "💬", "1,245", "Chats", "+12%"),
-        (col2, "☎️", "312", "Calls", "+18%"),
-        (col3, "✅", "94.2%", "Resolved", "+3.2%"),
-        (col4, "😊", "4.87/5", "CSAT", "+0.15"),
-        (col5, "🤖", "87%", "AI OK", "+5%"),
-        (col6, "⚡", "45s", "Response", "-15s"),
-    ]
-
-    for col, icon, value, label, trend in metrics:
-        with col:
-            st.metric(label, value, trend)
-
-    st.markdown("---")
-    st.markdown("""
-    <div class="premium-card">
-        <h4>✨ Widget Features</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
-            <div><p><strong>💬 Smart Chat</strong><br><span style="color: var(--text-muted); font-size: 13px;">Ask questions, get instant AI responses</span></p></div>
-            <div><p><strong>☎️ Call Support</strong><br><span style="color: var(--text-muted); font-size: 13px;">Schedule or start voice calls</span></p></div>
-            <div><p><strong>📚 Knowledge Base</strong><br><span style="color: var(--text-muted); font-size: 13px;">Smart answers from our KB</span></p></div>
-            <div><p><strong>👤 Talk to Agent</strong><br><span style="color: var(--text-muted); font-size: 13px;">Get human support anytime</span></p></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    with col1:
+        st.metric("Chats", "1,245", "+12%")
+    with col2:
+        st.metric("Calls", "312", "+18%")
+    with col3:
+        st.metric("Resolved", "94.2%", "+3.2%")
+    with col4:
+        st.metric("CSAT", "4.87/5", "+0.15")
+    with col5:
+        st.metric("AI OK", "87%", "+5%")
+    with col6:
+        st.metric("Response", "45s", "-15s")
 
 # ============================================================================
 # CHAT PAGE
 # ============================================================================
-def chat():
-    st.markdown("### 💬 Chat with Anamika")
+def chat_page():
+    st.markdown("### 💬 Chat Support")
 
-    st.markdown("""
-    <div class="premium-card">
-        <p style="color: var(--text-muted);">🤖 AI-powered • <strong>45s</strong> response time • <strong>96.8%</strong> accuracy</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    # Display chat messages
-    for msg in st.session_state.messages:
+    # Display chat
+    for msg in st.session_state.widget_chat:
         if msg["role"] == "bot":
-            st.markdown(f"**Anamika:** {msg['content']}")
+            st.info(f"🤖 **Anamika:** {msg['text']}")
         else:
-            st.markdown(f"**You:** {msg['content']}")
+            st.success(f"👤 **You:** {msg['text']}")
 
-    # Input area
+    # Input
     col1, col2 = st.columns([5, 1])
     with col1:
-        user_input = st.text_input("Your message...", placeholder="Ask anything", label_visibility="collapsed")
+        user_msg = st.text_input("Message...", label_visibility="collapsed", placeholder="Type your question")
     with col2:
         send = st.button("Send", use_container_width=True)
 
-    if send and user_input:
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        st.session_state.messages.append({"role": "bot", "content": "Thanks for your message! How else can I help?"})
+    if send and user_msg:
+        st.session_state.widget_chat.append({"role": "user", "text": user_msg})
+        st.session_state.widget_chat.append({"role": "bot", "text": "Thanks! I'm here to help. What else can I do?"})
         st.rerun()
 
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("☎️ Talk to Agent", use_container_width=True):
-            st.info("📞 Connecting to next available agent...")
+        if st.button("☎️ Call Agent", use_container_width=True):
+            st.info("📞 Connecting to agent...")
     with col2:
         if st.button("📊 Analytics", use_container_width=True):
             st.session_state.page = 'analytics'
@@ -488,24 +429,18 @@ def chat():
 # ============================================================================
 # VOICE PAGE
 # ============================================================================
-def voice():
-    st.markdown("### ☎️ Voice Call")
+def voice_page():
+    st.markdown("### ☎️ Schedule Call")
 
-    st.markdown("""
-    <div class="premium-card">
-        <p style="color: var(--text-muted);">🎧 Crystal-clear voice • Convin Sense powered</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2, gap="large")
+    col1, col2 = st.columns(2)
     with col1:
-        st.text_input("Your Name", placeholder="John Doe", label_visibility="collapsed")
-        st.text_input("Email", placeholder="john@example.com", label_visibility="collapsed")
+        st.text_input("Your Name", label_visibility="collapsed", placeholder="John Doe")
+        st.text_input("Email", label_visibility="collapsed", placeholder="john@example.com")
     with col2:
-        st.text_input("Phone", placeholder="+1-555-123-4567", label_visibility="collapsed")
+        st.text_input("Phone", label_visibility="collapsed", placeholder="+1-555-123-4567")
         st.selectbox("Best Time", ["9 AM - 12 PM", "12 PM - 3 PM", "3 PM - 6 PM", "6 PM - 9 PM"], label_visibility="collapsed")
 
-    if st.button("📞 Schedule Voice Call", use_container_width=True):
+    if st.button("📞 Schedule Call", use_container_width=True):
         st.success("✅ Call scheduled! We'll call you within 2 minutes.")
         st.balloons()
 
@@ -527,28 +462,16 @@ def voice():
 # ============================================================================
 # ANALYTICS PAGE
 # ============================================================================
-def analytics():
+def analytics_page():
     st.markdown("### 📊 Analytics")
 
-    tab1, tab2 = st.tabs(["Overview", "Performance"])
-
-    with tab1:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total Conversations", "3,847", "+15%")
-        with col2:
-            st.metric("Avg Resolution", "12m 30s", "-2m 15s")
-        with col3:
-            st.metric("Escalation Rate", "13%", "-2%")
-
-    with tab2:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("AI Accuracy", "96.8%", "+1.2%")
-        with col2:
-            st.metric("CSAT", "4.87/5", "+0.15")
-        with col3:
-            st.metric("Response Time", "45s", "-15s")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Conversations", "3,847", "+15%")
+    with col2:
+        st.metric("Avg Resolution", "12m 30s", "-2m")
+    with col3:
+        st.metric("Escalation Rate", "13%", "-2%")
 
     st.markdown("---")
     if st.button("Back to Home", use_container_width=True):
@@ -556,165 +479,117 @@ def analytics():
         st.rerun()
 
 # ============================================================================
-# ADMIN LOGIN
+# ADMIN PAGE
 # ============================================================================
-def admin_login():
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("""
-        <div class="premium-card" style="text-align: center;">
-            <h3>🔐 Anamika Admin</h3>
-            <p style="color: var(--text-muted); font-size: 13px;">Secure access required</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        password = st.text_input("Password", type="password", placeholder="Enter admin password", label_visibility="collapsed")
-
+def admin_page():
+    if not st.session_state.admin_pass:
+        st.markdown("### 🔐 Admin Login")
+        pwd = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
         if st.button("Login", use_container_width=True):
-            if password == "admin@anamika":
-                st.session_state.admin_password = True
-                st.session_state.page = 'admin_panel'
+            if pwd == "admin@anamika":
+                st.session_state.admin_pass = True
                 st.rerun()
             else:
                 st.error("❌ Invalid password")
-
-        if st.button("Back to Home", use_container_width=True):
+        if st.button("Back", use_container_width=True):
             st.session_state.page = 'dashboard'
+            st.rerun()
+    else:
+        st.markdown("### ⚙️ Admin Panel")
+
+        tab1, tab2, tab3 = st.tabs(["📚 KB", "🎤 Voice", "🤖 Bot"])
+
+        with tab1:
+            st.markdown("#### Knowledge Base")
+            uploaded = st.file_uploader("Upload", type=['pdf', 'doc', 'docx'])
+            if uploaded:
+                st.success(f"✅ {uploaded.name} uploaded!")
+
+        with tab2:
+            st.markdown("#### Voice Config")
+            st.text_input("Workspace ID", label_visibility="collapsed")
+            st.text_input("API Key", type="password", label_visibility="collapsed")
+
+        with tab3:
+            st.markdown("#### Bot Settings")
+            st.toggle("Use KB", value=True)
+            st.slider("Confidence", 0, 100, 75)
+
+        st.markdown("---")
+        if st.button("Logout", use_container_width=True):
+            st.session_state.admin_pass = False
             st.rerun()
 
 # ============================================================================
-# ADMIN PANEL
+# MAIN APP
 # ============================================================================
-def admin_panel():
-    st.markdown("### ⚙️ Admin Panel")
-
-    if not st.session_state.admin_password:
-        st.warning("⚠️ Unauthorized")
-        if st.button("Go Home"):
-            st.session_state.page = 'dashboard'
-            st.rerun()
-        return
-
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📚 KB", "🎤 Voice", "☎️ Agents", "📏 Escalation", "⏰ Hours", "🤖 Bot"])
-
-    with tab1:
-        st.markdown("#### Knowledge Base")
-        uploaded_file = st.file_uploader("Upload document", type=['pdf', 'doc', 'docx', 'txt'])
-        if uploaded_file:
-            st.success(f"✅ {uploaded_file.name} uploaded!")
-
-    with tab2:
-        st.markdown("#### Voice Configuration")
-        st.text_input("Workspace ID", placeholder="workspace_xyz")
-        st.text_input("API Key", placeholder="sk-sense-...", type="password")
-
-    with tab3:
-        st.markdown("#### Agent Management")
-        st.text_input("Agent Name", placeholder="John Doe")
-        st.selectbox("Status", ["Available", "Busy", "Break", "Offline"])
-
-    with tab4:
-        st.markdown("#### Escalation Rules")
-        st.selectbox("Trigger", ["Max attempts", "Low confidence", "Customer request"])
-
-    with tab5:
-        st.markdown("#### Business Hours")
-        st.time_input("Start Time", value=None)
-        st.time_input("End Time", value=None)
-
-    with tab6:
-        st.markdown("#### Bot Settings")
-        st.toggle("Use Knowledge Base", value=True)
-        st.slider("Confidence Threshold", 0, 100, 75)
-
-    st.markdown("---")
-    if st.button("Logout", use_container_width=True):
-        st.session_state.admin_password = False
-        st.session_state.page = 'dashboard'
-        st.rerun()
-
-# ============================================================================
-# MAIN APP LOGIC
-# ============================================================================
-
-# Hidden buttons to control widget state
-col1, col2, col3, col4 = st.columns([1, 1, 1, 10])
-
-with col1:
-    if st.button("🎯"):
-        st.session_state.widget_open = not st.session_state.widget_open
-        st.rerun()
-    st.markdown('<div id="anamika-widget-toggle" style="display: none;"></div>', unsafe_allow_html=True)
-
-with col2:
-    if st.button("✕"):
-        st.session_state.widget_open = False
-        st.rerun()
-    st.markdown('<div id="anamika-close-btn" style="display: none;"></div>', unsafe_allow_html=True)
-
-with col3:
-    if st.button("📤"):
-        if st.session_state.messages[-1]["role"] != "user":
-            user_msg = "User message"
-            st.session_state.messages.append({"role": "user", "content": user_msg})
-            st.session_state.messages.append({"role": "bot", "content": "Thanks! How else can I help?"})
-        st.rerun()
-    st.markdown('<div id="send-btn" style="display: none;"></div>', unsafe_allow_html=True)
-
-with col4:
-    if st.button("📞 Call"):
-        st.session_state.page = 'voice'
-        st.rerun()
-    st.markdown('<div id="call-btn" style="display: none;"></div>', unsafe_allow_html=True)
-
-# Hide the control buttons
-st.markdown("""
-<style>
-    [data-testid="stHorizontalBlock"] > :nth-child(1) { display: none !important; }
-</style>
-""", unsafe_allow_html=True)
 
 # Render floating widget
-render_floating_widget()
+render_widget()
 
-# Render chat messages inside widget
-if st.session_state.widget_open:
-    messages_html = ""
-    for msg in st.session_state.messages:
-        if msg["role"] == "bot":
-            messages_html += f'<div class="message-bot">{msg["content"]}</div>'
-        else:
-            messages_html += f'<div class="message-user">{msg["content"]}</div>'
+# Render content based on page
+if st.session_state.page == 'dashboard':
+    dashboard()
+elif st.session_state.page == 'chat':
+    chat_page()
+elif st.session_state.page == 'voice':
+    voice_page()
+elif st.session_state.page == 'analytics':
+    analytics_page()
+elif st.session_state.page == 'admin':
+    admin_page()
 
-    st.markdown(f"""
-    <script>
-        const messagesDiv = document.getElementById('anamika-messages');
+# Update widget messages with JavaScript
+messages_html = ""
+for msg in st.session_state.widget_chat:
+    if msg["role"] == "bot":
+        messages_html += f'<div class="msg-bot">{msg["text"]}</div>'
+    else:
+        messages_html += f'<div class="msg-user">{msg["text"]}</div>'
+
+st.markdown(f"""
+<script>
+    setTimeout(() => {{
+        const messagesDiv = document.getElementById('messages');
         if (messagesDiv) {{
             messagesDiv.innerHTML = `{messages_html}`;
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }}
-    </script>
-    """, unsafe_allow_html=True)
 
-# Main content based on current page
-if st.session_state.page == 'dashboard':
-    dashboard()
-elif st.session_state.page == 'chat':
-    chat()
-elif st.session_state.page == 'voice':
-    voice()
-elif st.session_state.page == 'analytics':
-    analytics()
-elif st.session_state.page == 'admin_login':
-    admin_login()
-elif st.session_state.page == 'admin_panel':
-    admin_panel()
+        const input = document.getElementById('msg-input');
+        const callBtn = document.getElementById('call-btn');
+        const agentBtn = document.getElementById('agent-btn');
+
+        if (input && input.value === '') {{
+            input.addEventListener('keypress', (e) => {{
+                if (e.key === 'Enter' && input.value.trim()) {{
+                    // Send message via Streamlit
+                    const event = new Event('change', {{ bubbles: true }});
+                    input.dispatchEvent(event);
+                }}
+            }});
+        }}
+
+        if (callBtn) {{
+            callBtn.addEventListener('click', () => {{
+                alert('📞 Connecting to voice support...');
+            }});
+        }}
+
+        if (agentBtn) {{
+            agentBtn.addEventListener('click', () => {{
+                alert('👤 Connecting to agent...');
+            }});
+        }}
+    }}, 300);
+</script>
+""", unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div style="text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid rgba(59, 130, 246, 0.1);">
     <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
-        🎯 Anamika Enterprise Widget | Powered by Convin AI | v4.0 Interactive Chat
+        🎯 Anamika | Enterprise Widget | v4.1 Smooth & Functional
     </p>
 </div>
 """, unsafe_allow_html=True)
