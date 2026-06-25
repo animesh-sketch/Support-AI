@@ -15,6 +15,7 @@ st.set_page_config(
 # STORAGE & KB
 # ============================================================================
 KB_DATA_FILE = "kb_files.json"
+KB_CONTENT_FILE = "kb_content.json"
 
 def load_kb_files():
     if os.path.exists(KB_DATA_FILE):
@@ -29,34 +30,52 @@ def save_kb_files(files):
     with open(KB_DATA_FILE, 'w') as f:
         json.dump(files, f, indent=2)
 
-def add_kb_file(name, size, file_type, status="Active"):
+def load_kb_content():
+    if os.path.exists(KB_CONTENT_FILE):
+        try:
+            with open(KB_CONTENT_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_kb_content(content):
+    with open(KB_CONTENT_FILE, 'w') as f:
+        json.dump(content, f, indent=2)
+
+def add_kb_file(name, size, file_type, content_text, status="Active"):
     files = load_kb_files()
+    kb_content = load_kb_content()
     if len(files) < 5:
         files.append({"name": name, "size": size, "type": file_type, "date": datetime.now().strftime("%Y-%m-%d"), "status": status})
+        kb_content[name] = {"title": name, "content": content_text}
         save_kb_files(files)
+        save_kb_content(kb_content)
         return True
     return False
-
-KB_CONTENT = {
-    "Password Reset Guide.pdf": {"title": "Password Reset Guide", "keywords": ["password", "reset", "forgot", "login"], "content": "To reset your password:\n1. Click 'Forgot Password' on login page\n2. Enter your email address\n3. Check email for reset link (arrives in 2 minutes)\n4. Click the link and create a new password\n5. Use new password to login"},
-    "Billing FAQ.docx": {"title": "Billing FAQ", "keywords": ["billing", "payment", "invoice", "subscription", "plan"], "content": "We accept: Credit cards (Visa, Mastercard, AmEx), PayPal, Bank transfers\nBilling occurs on the same date each month\nYou can change plans anytime - changes take effect next billing cycle\nRefund policy: 30 days on annual plans, 7 days on monthly plans"},
-    "API Documentation.pdf": {"title": "API Documentation", "keywords": ["api", "developer", "integration", "endpoint"], "content": "Base URL: https://api.anamika.ai/v1\nAuth: Bearer token in Authorization header\nEndpoints:\n- POST /chat - Send message\n- GET /conversations - List conversations\nRate Limits: 100 req/min (standard), 1000 req/min (enterprise)"},
-    "Troubleshooting.txt": {"title": "Troubleshooting", "keywords": ["error", "problem", "issue", "not working", "fix"], "content": "Widget not loading? Clear browser cache and enable JavaScript\nChat not responding? Check internet connection, refresh page\nAPI errors? Verify authentication token and check rate limits"}
-}
 
 def search_kb(query):
     try:
         q = query.lower().strip()
         results = []
-        for doc_name, doc_data in KB_CONTENT.items():
+        kb_content = load_kb_content()
+        for doc_name, doc_data in kb_content.items():
             score = 0
-            for kw in doc_data.get("keywords", []):
-                if kw in q:
-                    score += 3
-            if doc_data.get("title", "").lower() in q:
-                score += 4
+            title = doc_data.get("title", "").lower()
+            content = doc_data.get("content", "").lower()
+
+            if q in title:
+                score += 5
+            if q in content:
+                score += 2
+
+            for word in q.split():
+                if word in content:
+                    score += 1
+
             if score > 0:
                 results.append({"title": doc_data.get("title"), "content": doc_data.get("content"), "score": score})
+
         results.sort(key=lambda x: x["score"], reverse=True)
         return results
     except:
@@ -271,10 +290,6 @@ if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'kb_files' not in st.session_state:
     st.session_state.kb_files = load_kb_files()
-    if len(st.session_state.kb_files) == 0:
-        add_kb_file("Password Reset Guide.pdf", "2.3 MB", "PDF", "Active")
-        add_kb_file("Billing FAQ.docx", "1.8 MB", "DOCX", "Active")
-        st.session_state.kb_files = load_kb_files()
 
 # ============================================================================
 # CHAT WIDGET COMPONENT
@@ -421,10 +436,14 @@ elif st.session_state.page == 'admin':
                 file_type = uploaded_file.name.split('.')[-1].upper()
 
                 if st.button("✅ Save to Knowledge Base", use_container_width=True):
-                    add_kb_file(uploaded_file.name, file_size, file_type, "Active")
-                    st.session_state.kb_files = load_kb_files()
-                    st.success(f"✅ File '{uploaded_file.name}' saved to Knowledge Base!")
-                    st.balloons()
+                    try:
+                        file_content = uploaded_file.read().decode('utf-8')
+                        add_kb_file(uploaded_file.name, file_size, file_type, file_content, "Active")
+                        st.session_state.kb_files = load_kb_files()
+                        st.success(f"✅ File '{uploaded_file.name}' saved to Knowledge Base! 📚")
+                        st.balloons()
+                    except Exception as e:
+                        st.error(f"❌ Error reading file: {str(e)}")
             else:
                 st.error("❌ Maximum 5 files allowed. Delete a file first.")
 
@@ -445,6 +464,10 @@ elif st.session_state.page == 'admin':
             file_to_delete = st.selectbox("Select file to delete", [f["name"] for f in st.session_state.kb_files], key="delete_file")
             if st.button("🗑️ Delete Selected File", use_container_width=True):
                 st.session_state.kb_files = [f for f in st.session_state.kb_files if f["name"] != file_to_delete]
+                kb_content = load_kb_content()
+                if file_to_delete in kb_content:
+                    del kb_content[file_to_delete]
+                    save_kb_content(kb_content)
                 save_kb_files(st.session_state.kb_files)
                 st.success(f"✅ File '{file_to_delete}' deleted!")
                 st.rerun()
