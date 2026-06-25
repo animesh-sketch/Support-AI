@@ -301,46 +301,37 @@ if 'chat_history' not in st.session_state:
 # FLOATING WIDGET
 # ============================================================================
 def render_floating_widget():
-    col1, col2 = st.columns([1, 0.2])
+    # Hidden container for widget positioning
+    st.markdown("""
+    <div class="floating-widget" style="display: flex; flex-direction: column-reverse; gap: 10px;">
+    """, unsafe_allow_html=True)
 
-    with col2:
-        if st.session_state.widget_open:
-            st.markdown("""
-            <div class="floating-widget">
-                <div class="widget-menu">
-                    <button class="widget-close" onclick="window.location.reload();">✕</button>
-                    <h4 style="margin: 8px 0; color: #f1f5f9; font-size: 14px;">How can we help?</h4>
-            """, unsafe_allow_html=True)
-
-            col_a, col_b = st.columns(2)
-            with col_a:
-                if st.button("💬 Chat", key="widget_chat", use_container_width=True):
-                    st.session_state.current_page = 'chat'
-                    st.session_state.widget_open = False
-                    st.rerun()
-
-            with col_b:
-                if st.button("☎️ Call", key="widget_call", use_container_width=True):
-                    st.info("📞 Initiating call...")
-                    st.session_state.widget_open = False
-
-            st.markdown("""
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div class="floating-widget">
-                <button class="widget-button" onclick="document.querySelector('[data-testid=stButton]').click();" title="Open Support">
-                    💬
-                    <span class="widget-badge">2</span>
-                </button>
-            </div>
-            """, unsafe_allow_html=True)
-
-            if st.button("Open Widget", key="open_widget", label_visibility="collapsed"):
-                st.session_state.widget_open = True
+    if st.session_state.widget_open:
+        # Widget menu (open state)
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("💬 Chat", key="widget_chat_btn", use_container_width=True):
+                st.session_state.current_page = 'chat'
+                st.session_state.widget_open = False
                 st.rerun()
+
+        with col2:
+            if st.button("☎️ Call", key="widget_call_btn", use_container_width=True):
+                st.session_state.widget_open = False
+                st.info("📞 Initiating call...")
+                st.rerun()
+
+        # Close button
+        if st.button("✕ Close", key="widget_close_btn", use_container_width=True):
+            st.session_state.widget_open = False
+            st.rerun()
+    else:
+        # Widget button (closed state)
+        if st.button("💬 Support (2)", key="widget_open_btn", use_container_width=True):
+            st.session_state.widget_open = True
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================================================
 # HEADER
