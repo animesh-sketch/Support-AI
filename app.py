@@ -3,11 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
-import json
+import numpy as np
 
-# ============================================================================
-# PAGE CONFIG & THEME
-# ============================================================================
 st.set_page_config(
     page_title="Convin AI Support Console",
     page_icon="🚀",
@@ -16,244 +13,191 @@ st.set_page_config(
 )
 
 # ============================================================================
-# ENTERPRISE DESIGN SYSTEM
+# ULTRA-PREMIUM DESIGN SYSTEM
 # ============================================================================
 st.markdown("""
 <style>
-    * {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    :root {
+        --primary: #3b82f6;
+        --secondary: #8b5cf6;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --bg: #0f172a;
+        --bg-secondary: #1e293b;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
     }
 
-    /* Background */
+    * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        color: #e2e8f0;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        color: var(--text);
     }
 
-    /* Main content */
-    .main {
-        background: transparent;
+    .main { background: transparent; padding: 0; }
+
+    h1 {
+        font-size: 48px !important;
+        font-weight: 800 !important;
+        letter-spacing: -1px !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    /* Headers */
-    h1, h2, h3, h4, h5 {
-        color: #f1f5f9 !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.5px;
-    }
+    h2, h3, h4, h5 { color: var(--text) !important; font-weight: 700 !important; }
 
-    /* Enterprise card */
-    .enterprise-card {
-        background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 12px;
+    .premium-card {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 16px;
         padding: 24px;
-        backdrop-filter: blur(10px);
-        margin: 12px 0;
-        transition: all 0.3s ease;
+        backdrop-filter: blur(20px);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
 
-    .enterprise-card:hover {
-        border-color: rgba(148, 163, 184, 0.4);
-        background: rgba(30, 41, 59, 0.95);
+    .premium-card:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: rgba(30, 41, 59, 0.9);
+        box-shadow: 0 20px 50px rgba(59, 130, 246, 0.2);
+        transform: translateY(-4px);
     }
 
-    /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
         color: white !important;
         border: none !important;
-        padding: 10px 24px !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
+        padding: 12px 28px !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .stButton > button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.6) !important;
     }
 
-    /* Metrics */
-    .metric-card {
-        background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 12px;
-        padding: 16px;
+    .premium-metric {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 14px;
+        padding: 20px;
         text-align: center;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .premium-metric:hover {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+        border-color: rgba(59, 130, 246, 0.5);
+        transform: scale(1.05);
     }
 
     .metric-value {
         color: #3b82f6;
-        font-size: 28px;
-        font-weight: 700;
-        margin: 8px 0;
+        font-size: 36px;
+        font-weight: 900;
+        margin: 12px 0;
+        line-height: 1;
     }
 
     .metric-label {
-        color: #94a3b8;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .metric-change {
+        color: #22c55e;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 700;
+        margin-top: 8px;
     }
 
-    /* Chat */
-    .chat-widget {
-        background: rgba(15, 23, 42, 0.5);
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        border-radius: 12px;
-        padding: 16px;
-        height: 500px;
-        overflow-y: auto;
+    .premium-divider {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.3) 50%, transparent 100%);
+        margin: 32px 0;
     }
 
-    .message {
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin: 8px 0;
-        word-wrap: break-word;
-    }
-
-    .message-user {
-        background: rgba(59, 130, 246, 0.2);
-        border-left: 3px solid #3b82f6;
-        margin-left: auto;
-        max-width: 70%;
-        color: #e2e8f0;
-    }
-
-    .message-agent {
-        background: rgba(34, 197, 94, 0.1);
-        border-left: 3px solid #22c55e;
-        margin-right: auto;
-        max-width: 70%;
-        color: #e2e8f0;
-    }
-
-    /* Input */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea,
-    .stSelectbox > div > div > select {
-        background: rgba(30, 41, 59, 0.8) !important;
-        color: #e2e8f0 !important;
-        border: 1px solid rgba(148, 163, 184, 0.2) !important;
-        border-radius: 8px !important;
-        padding: 10px 12px !important;
-    }
-
-    /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
         background: transparent;
+        border-bottom: 2px solid rgba(59, 130, 246, 0.1);
     }
 
     .stTabs [data-baseweb="tab"] {
-        background: rgba(30, 41, 59, 0.5);
-        border-radius: 8px;
-        padding: 12px 20px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        color: #94a3b8;
+        background: transparent;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-radius: 10px;
+        padding: 12px 24px;
+        color: var(--text-muted);
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
         color: white !important;
         border: none !important;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
     }
 
-    /* Status badges */
-    .status-active {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #22c55e;
-        border-radius: 50%;
-        margin-right: 6px;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-
-    /* Divider */
-    .divider {
-        border-top: 1px solid rgba(148, 163, 184, 0.2);
-        margin: 24px 0;
-    }
-
-    /* Floating Widget - Truly Fixed in Corner */
     .floating-widget {
         position: fixed !important;
         bottom: 20px !important;
         right: 20px !important;
         z-index: 99999 !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    .widget-menu {
-        background: rgba(15, 23, 42, 0.98) !important;
-        border: 1px solid rgba(148, 163, 184, 0.3) !important;
-        border-radius: 12px !important;
-        padding: 16px !important;
-        min-width: 220px !important;
-        backdrop-filter: blur(20px) !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
-        margin-bottom: 12px !important;
-    }
-
-    .widget-badge {
-        position: absolute !important;
-        top: -8px !important;
-        right: -8px !important;
-        background: #ef4444 !important;
-        color: white !important;
-        width: 28px !important;
-        height: 28px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
-    }
-
-    .floating-widget button {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-        color: white !important;
-        border: none !important;
-        padding: 12px 24px !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        cursor: pointer !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
-        margin: 6px 0 !important;
-        width: 100% !important;
-        font-size: 14px !important;
-    }
-
-    .floating-widget button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5) !important;
-    }
-
-    /* Chat button - larger circle */
-    .floating-widget button:first-of-type {
+    .widget-button {
         width: 70px !important;
         height: 70px !important;
         border-radius: 50% !important;
-        padding: 0 !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+        border: none !important;
+        color: white !important;
         font-size: 32px !important;
+        cursor: pointer !important;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4) !important;
+        transition: all 0.3s ease !important;
+        padding: 0 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4) !important;
     }
 
-    .floating-widget button:first-of-type:hover {
-        transform: scale(1.1) !important;
+    .widget-button:hover {
+        transform: scale(1.12) !important;
+        box-shadow: 0 12px 35px rgba(59, 130, 246, 0.6) !important;
+    }
+
+    .stTextInput > div > div > input,
+    .stSelectbox > div > div > select {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: var(--text) !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        border-radius: 10px !important;
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+    }
+
+    .stTextInput > div > div > input:focus,
+    .stSelectbox > div > div > select:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -261,543 +205,523 @@ st.markdown("""
 # ============================================================================
 # SESSION STATE
 # ============================================================================
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = 'dashboard'
-
+if 'page' not in st.session_state:
+    st.session_state.page = 'dashboard'
 if 'widget_open' not in st.session_state:
     st.session_state.widget_open = False
 
-if 'kb_articles' not in st.session_state:
-    st.session_state.kb_articles = [
-        {'id': 1, 'title': 'Getting Started', 'category': 'Onboarding', 'content': 'How to set up your account...', 'version': 1, 'created': '2024-01-01'},
-        {'id': 2, 'title': 'Pricing Plans', 'category': 'Billing', 'content': 'We offer Starter, Pro, and Enterprise plans...', 'version': 1, 'created': '2024-01-02'},
-        {'id': 3, 'title': 'API Integration', 'category': 'Developer', 'content': 'REST API documentation and examples...', 'version': 2, 'created': '2024-01-03'},
-    ]
-
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = [
-        {'role': 'customer', 'message': 'What are your pricing plans?', 'time': '10:30 AM'},
-        {'role': 'agent', 'message': 'We offer three plans: Starter ($99), Pro ($299), Enterprise (custom). KB-sourced answer.', 'time': '10:31 AM'},
-    ]
+# ============================================================================
+# SAMPLE DATA GENERATORS
+# ============================================================================
+def generate_sample_data():
+    dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=30, freq='D')
+    return {
+        'dates': dates,
+        'tickets': np.random.randint(10, 50, 30),
+        'chat_volume': np.random.randint(20, 80, 30),
+        'calls': np.random.randint(5, 25, 30),
+        'sentiment_pos': np.random.randint(70, 95, 30),
+        'sentiment_neg': np.random.randint(2, 15, 30),
+    }
 
 # ============================================================================
 # FLOATING WIDGET
 # ============================================================================
-def render_floating_widget():
+def render_widget():
     if st.session_state.widget_open:
-        # Open state - show menu
         st.markdown("""
         <div class="floating-widget">
-            <div class="widget-menu" style="display: block;">
-                <h4 style="margin: 0 0 12px 0; color: #f1f5f9; font-size: 14px; font-weight: 600;">
-                    How can we help?
+            <div class="premium-card" style="min-width: 240px; position: fixed; bottom: 100px; right: 20px; z-index: 99998;">
+                <h4 style="margin: 0 0 16px 0; color: var(--text); font-size: 16px; font-weight: 700;">
+                    🚀 How can we help?
                 </h4>
         """, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2, gap="small")
         with col1:
-            if st.button("💬 Chat", key="widget_chat", use_container_width=True):
-                st.session_state.current_page = 'chat'
-                st.session_state.widget_open = False
+            if st.button("💬 Chat", key="w_chat", use_container_width=True):
+                st.session_state.page = 'chat'
                 st.rerun()
-
         with col2:
-            if st.button("☎️ Call", key="widget_call", use_container_width=True):
-                st.session_state.widget_open = False
+            if st.button("☎️ Call", key="w_call", use_container_width=True):
+                st.session_state.page = 'voice'
                 st.rerun()
 
-        st.markdown("""
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
-        # Close button
-        if st.button("Close Widget", key="close_widget", use_container_width=True):
+        if st.button("✕ Close", key="w_close", use_container_width=True):
             st.session_state.widget_open = False
             st.rerun()
-
     else:
-        # Closed state - show floating button
         st.markdown("""
         <div class="floating-widget">
-            <div style="text-align: center;">
-                <div style="position: relative; display: inline-block;">
-                    <span class="widget-badge">2</span>
+            <div style="position: relative; display: inline-block; width: 70px;">
+                <div style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: white;
+                            width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+                            justify-content: center; font-size: 12px; font-weight: 700;
+                            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4); z-index: 10;">3</div>
         """, unsafe_allow_html=True)
 
-        if st.button("💬", key="open_widget", help="Open Support Widget"):
+        if st.button("💬", key="w_open", help="Open Support Widget"):
             st.session_state.widget_open = True
             st.rerun()
 
-        st.markdown("""
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ============================================================================
-# HEADER
+# DASHBOARD PAGE (MAIN) - PREMIUM + ADVANCED
 # ============================================================================
-def render_header():
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("""
-        <div style="text-align: center; padding: 20px 0;">
-            <h1 style="margin: 0; font-size: 32px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-                       -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                🚀 Convin AI Support Console
-            </h1>
-            <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 13px;">
-                Enterprise-Grade Support Platform
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+def dashboard():
+    st.markdown("""
+    <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+                 border-radius: 20px; margin-bottom: 40px;">
+        <h1>📊 Support Analytics Dashboard</h1>
+        <p style="color: var(--text-muted); font-size: 16px; margin-top: 12px;">
+            Real-time insights & AI intelligence
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ============================================================================
-# DASHBOARD PAGE
-# ============================================================================
-def render_dashboard():
-    st.markdown("### 📊 Executive Dashboard")
-
-    # Global filters
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        date_range = st.selectbox("📅 Date Range", ["Today", "Last 7 Days", "Last 30 Days", "Custom"])
-    with col2:
-        team_filter = st.selectbox("👥 Team", ["All Teams", "Support", "Sales", "Technical"])
-    with col3:
-        channel_filter = st.selectbox("📱 Channel", ["All", "Chat", "Voice", "Email"])
-    with col4:
-        product_filter = st.selectbox("🏢 Product", ["All Products", "Product A", "Product B"])
-
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    # KPIs
+    # Advanced Filters
     col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        period = st.selectbox("📅 Period", ["Today", "7D", "30D", "90D"], label_visibility="collapsed")
+    with col2:
+        team = st.selectbox("👥 Team", ["All", "Support", "Sales", "Technical"], label_visibility="collapsed")
+    with col3:
+        channel = st.selectbox("📢 Channel", ["All", "Chat", "Voice", "Email"], label_visibility="collapsed")
+    with col4:
+        sentiment = st.selectbox("😊 Sentiment", ["All", "Positive", "Neutral", "Negative"], label_visibility="collapsed")
+    with col5:
+        ai_quality = st.selectbox("🤖 AI Quality", ["All", "High", "Medium", "Low"], label_visibility="collapsed")
+
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
+
+    # KPIs - 6 metrics
+    st.markdown("#### 🎯 Key Performance Indicators")
+    col1, col2, col3, col4, col5, col6 = st.columns(6, gap="small")
+
+    data = generate_sample_data()
 
     kpis = [
-        (col1, "💬", "156", "Total Chats", "-2%"),
-        (col2, "✅", "89%", "Resolution Rate", "+5%"),
-        (col3, "☎️", "48", "Voice Calls", "+12%"),
-        (col4, "⏱️", "2m 15s", "Avg Response", "-30s"),
-        (col5, "😊", "4.8/5", "CSAT", "+0.2"),
+        (col1, "💬", "892", "Tickets", "+15%"),
+        (col2, "✅", "94.2%", "Resolved", "+3.2%"),
+        (col3, "⚡", "1m 45s", "Response", "-22s"),
+        (col4, "😊", "4.87/5", "CSAT", "+0.15"),
+        (col5, "🤖", "87%", "AI Contained", "+5%"),
+        (col6, "☎️", "312", "Calls", "+18%"),
     ]
 
-    for col, icon, value, label, change in kpis:
+    for col, icon, value, label, trend in kpis:
         with col:
             st.markdown(f"""
-            <div class="metric-card">
+            <div class="premium-metric">
                 <div style="font-size: 20px;">{icon}</div>
-                <div class="metric-value">{value}</div>
+                <div class="metric-value" style="font-size: 28px;">{value}</div>
                 <div class="metric-label">{label}</div>
-                <div style="color: #22c55e; font-size: 11px; margin-top: 4px;">{change}</div>
+                <div class="metric-change">{trend}</div>
             </div>
             """, unsafe_allow_html=True)
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
 
-    # Charts
-    col1, col2 = st.columns(2)
+    # Advanced Tabs with Charts
+    st.markdown("#### 📈 Real-time Analytics")
 
-    with col1:
-        st.markdown("#### 📈 Chat Volume (7 Days)")
-        dates = pd.date_range(start=datetime.now() - timedelta(days=7), periods=7, freq='D')
-        chats = [12, 15, 18, 22, 19, 25, 28]
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Trends", "💬 Chat", "☎️ Voice", "😊 Sentiment", "🤖 AI Insights", "📈 Predictive"])
 
-        fig = go.Figure(data=go.Scatter(x=dates, y=chats, fill='tozeroy', mode='lines+markers',
-                                        line=dict(color='#3b82f6', width=3),
-                                        marker=dict(size=8, color='#2563eb')))
-        fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
-                         xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='rgba(148,163,184,0.1)'))
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col2:
-        st.markdown("#### 📊 Channel Distribution")
-        channels = ['Chat', 'Voice', 'Email']
-        counts = [156, 48, 32]
-
-        fig = go.Figure(data=go.Pie(labels=channels, values=counts,
-                                     marker=dict(colors=['#3b82f6', '#2563eb', '#1e40af']),
-                                     textinfo='label+percent'))
-        fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)')
-        st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    # Live conversations
-    st.markdown("#### 💬 Live Conversations")
-
-    conversations = [
-        {"customer": "Sarah Johnson", "channel": "Chat", "status": "Active", "duration": "5 min", "intent": "Pricing"},
-        {"customer": "Mike Davis", "channel": "Voice", "status": "In Progress", "duration": "12 min", "intent": "Technical Support"},
-        {"customer": "Emma Wilson", "channel": "Chat", "status": "Resolved", "duration": "8 min", "intent": "Account"},
-    ]
-
-    for conv in conversations:
-        col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
+    with tab1:
+        col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"**{conv['customer']}**")
-            st.caption(conv['intent'])
+            st.markdown("**Ticket Volume Trend (30 days)**")
+            fig = go.Figure(data=go.Scatter(x=data['dates'], y=data['tickets'], fill='tozeroy',
+                                            line=dict(color='#3b82f6', width=3),
+                                            marker=dict(size=8)))
+            fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
+                             paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
+                             xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='rgba(148,163,184,0.1)'),
+                             showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
+
         with col2:
-            st.markdown(f"{conv['channel']}")
-        with col3:
-            st.markdown(f"⏱️ {conv['duration']}")
-        with col4:
-            status_badge = "🟢" if conv['status'] == "Active" else "🟡" if conv['status'] == "In Progress" else "⚪"
-            st.markdown(f"{status_badge} {conv['status']}")
-        st.divider()
+            st.markdown("**Channel Distribution**")
+            channels = ['Chat', 'Voice', 'Email']
+            counts = [520, 240, 132]
+            fig = go.Figure(data=go.Pie(labels=channels, values=counts,
+                                         marker=dict(colors=['#3b82f6', '#8b5cf6', '#06b6d4']),
+                                         textposition='inside', textinfo='label+percent'))
+            fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
+                             paper_bgcolor='rgba(30,41,59,0.5)')
+            st.plotly_chart(fig, use_container_width=True)
+
+    with tab2:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Chat Volume (30 days)**")
+            fig = go.Figure(data=go.Bar(x=data['dates'], y=data['chat_volume'],
+                                        marker=dict(color='#3b82f6')))
+            fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
+                             paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
+                             showlegend=False, xaxis=dict(showgrid=False))
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.markdown("""
+                <div class="premium-card">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #3b82f6; font-weight: 900;">1,245</div>
+                        <div style="color: var(--text-muted); font-size: 12px; margin-top: 8px; text-transform: uppercase;">Chat Messages</div>
+                        <div style="color: #22c55e; font-size: 11px; margin-top: 6px;">↑ 12% vs last week</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with col_b:
+                st.markdown("""
+                <div class="premium-card">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #8b5cf6; font-weight: 900;">2.1m</div>
+                        <div style="color: var(--text-muted); font-size: 12px; margin-top: 8px; text-transform: uppercase;">Avg Response Time</div>
+                        <div style="color: #ef4444; font-size: 11px; margin-top: 6px;">↑ 15 sec vs target</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    with tab3:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Call Volume & Duration**")
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=data['dates'], y=data['calls'], mode='lines+markers',
+                                     name='Calls', line=dict(color='#8b5cf6', width=3)))
+            fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
+                             paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
+                             xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='rgba(148,163,184,0.1)'))
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            col_a, col_b = st.columns(2)
+            with col_a:
+                st.markdown("""
+                <div class="premium-card">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #8b5cf6; font-weight: 900;">312</div>
+                        <div style="color: var(--text-muted); font-size: 12px; margin-top: 8px; text-transform: uppercase;">Total Calls</div>
+                        <div style="color: #22c55e; font-size: 11px; margin-top: 6px;">✓ 94.2% Connected</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with col_b:
+                st.markdown("""
+                <div class="premium-card">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; color: #f59e0b; font-weight: 900;">8.3m</div>
+                        <div style="color: var(--text-muted); font-size: 12px; margin-top: 8px; text-transform: uppercase;">Avg Duration</div>
+                        <div style="color: #22c55e; font-size: 11px; margin-top: 6px;">↓ 20 sec improvement</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    with tab4:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Sentiment Distribution**")
+            sentiments = ['Positive', 'Neutral', 'Negative']
+            counts = [456, 234, 56]
+            colors = ['#22c55e', '#94a3b8', '#ef4444']
+            fig = go.Figure(data=go.Pie(labels=sentiments, values=counts,
+                                         marker=dict(colors=colors),
+                                         textposition='inside', textinfo='label+percent'))
+            fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
+                             paper_bgcolor='rgba(30,41,59,0.5)')
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            st.markdown("**Sentiment Trend**")
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=data['dates'], y=data['sentiment_pos'], mode='lines+markers',
+                                     name='Positive', line=dict(color='#22c55e', width=3)))
+            fig.add_trace(go.Scatter(x=data['dates'], y=data['sentiment_neg'], mode='lines+markers',
+                                     name='Negative', line=dict(color='#ef4444', width=3)))
+            fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
+                             paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)',
+                             xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='rgba(148,163,184,0.1)'))
+            st.plotly_chart(fig, use_container_width=True)
+
+    with tab5:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            <div class="premium-card">
+                <h4 style="margin: 0 0 16px 0;">🤖 AI Performance Metrics</h4>
+                <div style="margin: 12px 0;">
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                        <span>Accuracy</span>
+                        <strong style="color: #22c55e;">96.8%</strong>
+                    </div>
+                    <div style="background: rgba(148,163,184,0.2); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); height: 100%; width: 96.8%;"></div>
+                    </div>
+                </div>
+                <div style="margin: 12px 0;">
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                        <span>Resolution Rate</span>
+                        <strong style="color: #22c55e;">87%</strong>
+                    </div>
+                    <div style="background: rgba(148,163,184,0.2); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); height: 100%; width: 87%;"></div>
+                    </div>
+                </div>
+                <div style="margin: 12px 0;">
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                        <span>Containment Rate</span>
+                        <strong style="color: #22c55e;">83%</strong>
+                    </div>
+                    <div style="background: rgba(148,163,184,0.2); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); height: 100%; width: 83%;"></div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+            <div class="premium-card">
+                <h4 style="margin: 0 0 16px 0;">📊 Real-time Bot Status</h4>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border-left: 3px solid #22c55e;">
+                    <div style="font-weight: 700; color: #22c55e;">🤖 Chat Bot</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">12 active conversations</div>
+                </div>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border-left: 3px solid #22c55e;">
+                    <div style="font-weight: 700; color: #22c55e;">☎️ Voice Bot</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">8 active calls at 94.2% success</div>
+                </div>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border-left: 3px solid #22c55e;">
+                    <div style="font-weight: 700; color: #22c55e;">🎯 AI Agent</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">87% contained, 13% escalated</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with tab6:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            <div class="premium-card">
+                <h4 style="margin: 0 0 16px 0;">⚠️ Predictive Insights</h4>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border-left: 3px solid #22c55e;">
+                    <div style="font-weight: 700; color: #22c55e;">✓ Churn Risk</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">12 customers identified • Action needed</div>
+                </div>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <div style="font-weight: 700; color: #f59e0b;">⚡ Escalation Likelihood</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">23% of open tickets may escalate</div>
+                </div>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                    <div style="font-weight: 700; color: #3b82f6;">🕐 Peak Hours</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">2-4 PM today (High volume expected)</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown("""
+            <div class="premium-card">
+                <h4 style="margin: 0 0 16px 0;">💰 Business Impact</h4>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                    <div style="font-weight: 700; color: #8b5cf6;">💵 Cost per Ticket</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">$12.50 avg • ↓ 18% vs last month</div>
+                </div>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                    <div style="font-weight: 700; color: #8b5cf6;">💎 Revenue Protected</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">$245K this month via AI automation</div>
+                </div>
+                <div style="margin: 16px 0; padding: 12px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                    <div style="font-weight: 700; color: #8b5cf6;">📈 NPS Improvement</div>
+                    <div style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">+8.5 points from AI support</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
+
+    # Bottom Navigation
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("💬 Start Chat", use_container_width=True):
+            st.session_state.page = 'chat'
+            st.rerun()
+    with col2:
+        if st.button("☎️ Schedule Call", use_container_width=True):
+            st.session_state.page = 'voice'
+            st.rerun()
+    with col3:
+        if st.button("⚙️ Settings", use_container_width=True):
+            st.session_state.page = 'settings'
+            st.rerun()
 
 # ============================================================================
 # CHAT PAGE
 # ============================================================================
-def render_chat():
+def chat():
     st.markdown("### 💬 AI Chat Support")
+    st.markdown("""
+    <div class="premium-card">
+        <p style="color: var(--text-muted);">🤖 <strong>AI Agent</strong> • Response Time: <strong>45s</strong> • Confidence: <strong>96.8%</strong></p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("**Agent Status:** <span class='status-active'></span> Online & Ready", unsafe_allow_html=True)
-    with col2:
-        if st.button("Request Agent", use_container_width=True):
-            st.info("📞 Escalating to human agent...")
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    # Chat widget
-    st.markdown('<div class="chat-widget">', unsafe_allow_html=True)
-
-    for msg in st.session_state.chat_history:
-        if msg['role'] == 'customer':
-            st.markdown(f"""
-            <div class="message message-user">
-                <strong>You:</strong> {msg['message']}<br>
-                <small style="opacity: 0.7;">{msg['time']}</small>
+    st.markdown("""
+    <div class="premium-card" style="height: 400px; overflow-y: auto;">
+        <div style="padding: 16px 0;">
+            <div style="background: rgba(59, 130, 246, 0.2); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #3b82f6; margin: 8px 0;">
+                <p style="margin: 0;"><strong>You:</strong> What are your pricing plans?</p>
             </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="message message-agent">
-                <strong>🤖 AI Agent:</strong> {msg['message']}<br>
-                <small style="opacity: 0.7;">{msg['time']} • KB-Sourced</small>
+            <div style="background: rgba(34, 197, 94, 0.2); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #22c55e; margin: 8px 0;">
+                <p style="margin: 0;"><strong>🤖 AI:</strong> We offer Starter ($99), Pro ($299), and Enterprise (custom) plans with 30-day free trial.</p>
             </div>
-            """, unsafe_allow_html=True)
+            <div style="background: rgba(59, 130, 246, 0.2); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #3b82f6; margin: 8px 0;">
+                <p style="margin: 0;"><strong>You:</strong> Which is best for 20 people?</p>
+            </div>
+            <div style="background: rgba(34, 197, 94, 0.2); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #22c55e; margin: 8px 0;">
+                <p style="margin: 0;"><strong>🤖 AI:</strong> Pro plan at $299/month is ideal for your team size. Need more info?</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    # Input
-    col1, col2 = st.columns([5, 1])
+    col1, col2 = st.columns([4, 1])
     with col1:
-        user_input = st.text_input("Type your message...", placeholder="Ask anything about our products", label_visibility="collapsed")
+        msg = st.text_input("Your message...", placeholder="Ask anything...", label_visibility="collapsed")
     with col2:
         if st.button("Send", use_container_width=True):
-            if user_input:
-                st.session_state.chat_history.append({'role': 'customer', 'message': user_input, 'time': datetime.now().strftime("%I:%M %p")})
-                st.session_state.chat_history.append({'role': 'agent', 'message': f'✅ Found in KB: {user_input[:30]}...', 'time': datetime.now().strftime("%I:%M %p")})
-                st.rerun()
+            if msg:
+                st.success("✅ Message sent!")
 
-    # Quick actions
     col1, col2, col3 = st.columns(3)
     with col1:
-        if st.button("☎️ Talk to Agent"):
-            st.info("📞 Convin Sense: Transferring to agent with full context...")
+        if st.button("☎️ Talk to Agent", use_container_width=True):
+            st.info("📞 Transferring to human agent...")
     with col2:
-        if st.button("📞 Request Callback"):
-            st.success("✅ Callback scheduled for next available agent")
+        if st.button("Dashboard", use_container_width=True):
+            st.session_state.page = 'dashboard'
+            st.rerun()
     with col3:
-        if st.button("📚 Browse KB"):
-            st.session_state.current_page = 'kb'
+        if st.button("Settings", use_container_width=True):
+            st.session_state.page = 'settings'
             st.rerun()
 
 # ============================================================================
-# VOICE ANALYTICS
+# VOICE PAGE
 # ============================================================================
-def render_voice_analytics():
-    st.markdown("### ☎️ Voice Bot Analytics")
+def voice():
+    st.markdown("### ☎️ Schedule a Call")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    st.markdown("""
+    <div class="premium-card">
+        <p style="color: var(--text-muted);">Connect with our support team for dedicated assistance</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    voice_metrics = [
-        (col1, "☎️", "248", "Total Calls", "-5%"),
-        (col2, "✅", "196", "Connected", "+8%"),
-        (col3, "❌", "52", "Failed", "-12%"),
-        (col4, "86%", "Success Rate", "+3%"),
-        (col5, "8m 30s", "Avg Duration", "+45s"),
-    ]
-
-    for col, icon, value, label, change in voice_metrics:
-        with col:
-            st.markdown(f"""
-            <div class="metric-card">
-                <div style="font-size: 18px;">{icon}</div>
-                <div class="metric-value" style="font-size: 20px;">{value}</div>
-                <div class="metric-label">{label}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2, gap="large")
 
     with col1:
-        st.markdown("#### Intent Distribution")
-        intents = ['Billing', 'Technical', 'General', 'Escalation']
-        counts = [85, 78, 52, 33]
-
-        fig = go.Figure(data=go.Bar(x=intents, y=counts, marker=dict(color='#3b82f6')))
-        fig.update_layout(template='plotly_dark', height=300, margin=dict(l=0, r=0, t=0, b=0),
-                         paper_bgcolor='rgba(30,41,59,0.5)', plot_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig, use_container_width=True)
+        st.text_input("Your Name", placeholder="John Doe")
+        st.text_input("Email", placeholder="john@example.com")
 
     with col2:
-        st.markdown("#### Resolution Metrics")
-        metrics = {
-            'Bot Containment': '78%',
-            'Escalation Rate': '22%',
-            'First Call Resolution': '72%',
-            'STT Accuracy': '96.2%',
-            'TTS Quality': '4.5/5',
-            'Response Latency': '1.2s'
-        }
+        st.text_input("Phone Number", placeholder="+1-555-123-4567")
+        st.selectbox("Best Time", ["9 AM - 12 PM", "12 PM - 3 PM", "3 PM - 6 PM", "6 PM - 9 PM"])
 
-        for key, value in metrics.items():
-            st.markdown(f"**{key}:** `{value}`")
+    if st.button("📞 Schedule Call Now", use_container_width=True):
+        st.success("✅ Call scheduled! We'll call you soon.")
+        st.balloons()
 
-# ============================================================================
-# CHAT ANALYTICS
-# ============================================================================
-def render_chat_analytics():
-    st.markdown("### 💬 Chat Analytics")
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    chat_metrics = [
-        (col1, "💬", "156", "Total Chats", "+12%"),
-        (col2, "✅", "139", "Resolved", "+15%"),
-        (col3, "⏳", "17", "Unresolved", "-8%"),
-        (col4, "89%", "Containment", "+5%"),
-        (col5, "2m 15s", "Avg Response", "-30s"),
-    ]
-
-    for col, icon, value, label, change in chat_metrics:
-        with col:
-            st.markdown(f"""
-            <div class="metric-card">
-                <div style="font-size: 18px;">{icon}</div>
-                <div class="metric-value" style="font-size: 20px;">{value}</div>
-                <div class="metric-label">{label}</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-
+    col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("#### KB Usage & Topics")
-        topics = {
-            'Billing': '45 chats',
-            'Technical': '38 chats',
-            'Account': '32 chats',
-            'General': '28 chats',
-            'Other': '13 chats',
-        }
-
-        for topic, count in topics.items():
-            st.markdown(f"📚 **{topic}**: {count}")
-
+        if st.button("💬 Chat Instead", use_container_width=True):
+            st.session_state.page = 'chat'
+            st.rerun()
     with col2:
-        st.markdown("#### Performance Indicators")
-        indicators = {
-            'First Response Time': '2m 15s ✅',
-            'Resolution Time': '8m 45s ✅',
-            'SLA Compliance': '96% ✅',
-            'Repeat Query Rate': '12% ⚠️',
-            'Hallucination Rate': '0.8% ✅',
-            'Agent Performance': '4.7/5 ✅',
-        }
-
-        for indicator, value in indicators.items():
-            st.markdown(f"**{indicator}**: {value}")
+        if st.button("Dashboard", use_container_width=True):
+            st.session_state.page = 'dashboard'
+            st.rerun()
+    with col3:
+        if st.button("Settings", use_container_width=True):
+            st.session_state.page = 'settings'
+            st.rerun()
 
 # ============================================================================
-# KNOWLEDGE BASE (ADMIN)
+# SETTINGS PAGE
 # ============================================================================
-def render_kb():
-    st.markdown("### 📚 Knowledge Base Management")
+def settings():
+    st.markdown("### ⚙️ Settings")
 
-    tab1, tab2, tab3 = st.tabs(["Browse Articles", "Create/Edit", "Analytics"])
+    tab1, tab2, tab3 = st.tabs(["Profile", "Preferences", "Support"])
 
     with tab1:
-        st.markdown("#### Existing Articles")
-        search = st.text_input("🔍 Search KB...", placeholder="Search articles")
-
-        for article in st.session_state.kb_articles:
-            if not search or search.lower() in article['title'].lower():
-                col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-                with col1:
-                    st.markdown(f"**{article['title']}**")
-                    st.caption(f"Category: {article['category']}")
-                with col2:
-                    st.markdown(f"v{article['version']}")
-                with col3:
-                    st.markdown(f"{article['created']}")
-                with col4:
-                    if st.button("Edit", key=f"edit_{article['id']}"):
-                        st.info(f"Editing: {article['title']}")
-                st.divider()
+        st.markdown("""
+        <div class="premium-card">
+            <h4>👤 Profile Information</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        st.text_input("Full Name", value="John Doe")
+        st.text_input("Email", value="john@example.com")
+        st.text_input("Phone", value="+1-555-123-4567")
 
     with tab2:
-        st.markdown("#### Create New Article")
-        col1, col2 = st.columns(2)
-
-        with col1:
-            new_title = st.text_input("Article Title")
-            new_category = st.selectbox("Category", ["Onboarding", "Billing", "Developer", "Technical", "Account"])
-
-        with col2:
-            new_content = st.text_area("Content", height=150, placeholder="Write your article...")
-
-        if st.button("📤 Create Article", use_container_width=True):
-            if new_title and new_content:
-                st.success(f"✅ Article '{new_title}' created!")
+        st.markdown("""
+        <div class="premium-card">
+            <h4>🎨 Preferences</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        st.toggle("🔔 Email Notifications", value=True)
+        st.toggle("📱 SMS Notifications", value=True)
+        st.selectbox("📧 Email Frequency", ["Realtime", "Daily Digest", "Weekly"])
 
     with tab3:
-        st.markdown("#### KB Analytics")
-        col1, col2 = st.columns(2)
+        st.markdown("""
+        <div class="premium-card">
+            <h4>📞 Support Options</h4>
+            <p style="color: var(--text-muted);">Email: support@convin.ai</p>
+            <p style="color: var(--text-muted);">Phone: 1-800-CONVIN-AI</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        with col1:
-            st.markdown("**Most Used Articles:**")
-            for i, article in enumerate(st.session_state.kb_articles[:3], 1):
-                st.markdown(f"{i}. **{article['title']}** - {50-i*10} references")
+    st.markdown('<div class="premium-divider"></div>', unsafe_allow_html=True)
 
-        with col2:
-            st.markdown("**Knowledge Gaps:**")
-            gaps = ["Refund Process (15 queries)", "API Rate Limits (12 queries)", "Integration Guide (8 queries)"]
-            for gap in gaps:
-                st.markdown(f"⚠️ {gap}")
-
-# ============================================================================
-# SETTINGS (ADMIN)
-# ============================================================================
-def render_settings():
-    st.markdown("### ⚙️ Admin Settings")
-
-    tab1, tab2, tab3 = st.tabs(["API Configuration", "Integrations", "Team"])
-
-    with tab1:
-        st.markdown("#### Convin Sense Setup")
-        col1, col2 = st.columns(2)
-
-        with col1:
-            api_key = st.text_input("Convin API Key", type="password", placeholder="Enter API key")
-            phone_pool = st.text_input("Phone Pool", value="+1-800-SUPPORT")
-
-        with col2:
-            skill_routing = st.checkbox("Enable Skill-Based Routing", value=True)
-            priority_routing = st.checkbox("Enable Priority Routing", value=True)
-            queue_management = st.checkbox("Enable Queue Management", value=True)
-
-        if st.button("💾 Save Configuration"):
-            st.success("✅ Configuration saved!")
-
-    with tab2:
-        st.markdown("#### Active Integrations")
-        integrations = [
-            {"name": "Slack", "status": "Connected", "icon": "✅"},
-            {"name": "Salesforce", "status": "Connected", "icon": "✅"},
-            {"name": "Zendesk", "status": "Pending", "icon": "⏳"},
-            {"name": "Jira", "status": "Not Connected", "icon": "❌"},
-        ]
-
-        for integration in integrations:
-            col1, col2, col3 = st.columns([2, 1, 1])
-            with col1:
-                st.markdown(f"**{integration['name']}**")
-            with col2:
-                st.markdown(integration['status'])
-            with col3:
-                st.markdown(integration['icon'])
-
-    with tab3:
-        st.markdown("#### Team Management")
-        team = pd.DataFrame({
-            'Name': ['Alice Johnson', 'Bob Smith', 'Carol White'],
-            'Role': ['Admin', 'Supervisor', 'Agent'],
-            'Status': ['🟢 Online', '🟡 Away', '🟢 Online'],
-            'Chats': [0, 5, 12],
-        })
-        st.dataframe(team, use_container_width=True, hide_index=True)
-
-# ============================================================================
-# RENDER FLOATING WIDGET
-# ============================================================================
-render_floating_widget()
-
-# ============================================================================
-# NAVIGATION
-# ============================================================================
-render_header()
-
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-# Navigation buttons
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6 = st.columns(6)
-
-with nav_col1:
-    if st.button("📊 Dashboard", use_container_width=True):
-        st.session_state.current_page = 'dashboard'
+    if st.button("Back to Dashboard", use_container_width=True):
+        st.session_state.page = 'dashboard'
         st.rerun()
 
-with nav_col2:
-    if st.button("💬 Chat", use_container_width=True):
-        st.session_state.current_page = 'chat'
-        st.rerun()
-
-with nav_col3:
-    if st.button("☎️ Voice", use_container_width=True):
-        st.session_state.current_page = 'voice'
-        st.rerun()
-
-with nav_col4:
-    if st.button("📈 Chat Analytics", use_container_width=True):
-        st.session_state.current_page = 'chat_analytics'
-        st.rerun()
-
-with nav_col5:
-    if st.button("📚 KB", use_container_width=True):
-        st.session_state.current_page = 'kb'
-        st.rerun()
-
-with nav_col6:
-    if st.button("⚙️ Settings", use_container_width=True):
-        st.session_state.current_page = 'settings'
-        st.rerun()
-
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
 # ============================================================================
-# RENDER PAGES
+# MAIN APP
 # ============================================================================
-if st.session_state.current_page == 'dashboard':
-    render_dashboard()
-elif st.session_state.current_page == 'chat':
-    render_chat()
-elif st.session_state.current_page == 'voice':
-    render_voice_analytics()
-elif st.session_state.current_page == 'chat_analytics':
-    render_chat_analytics()
-elif st.session_state.current_page == 'kb':
-    render_kb()
-elif st.session_state.current_page == 'settings':
-    render_settings()
+render_widget()
+
+if st.session_state.page == 'dashboard':
+    dashboard()
+elif st.session_state.page == 'chat':
+    chat()
+elif st.session_state.page == 'voice':
+    voice()
+elif st.session_state.page == 'settings':
+    settings()
 
 # Footer
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 st.markdown("""
-<div style="text-align: center; color: #64748b; font-size: 12px; padding: 20px 0;">
-    <p>🚀 Convin AI Support Console v1.0 • Enterprise-Grade Support Platform</p>
+<div style="text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid rgba(59, 130, 246, 0.1);">
+    <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
+        🚀 Convin AI Support Console | Enterprise Intelligence Platform | v2.0
+    </p>
 </div>
 """, unsafe_allow_html=True)
